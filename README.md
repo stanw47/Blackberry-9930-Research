@@ -17,6 +17,21 @@ the (u)nexplored paths to running custom code.
   flash model, custom-OS-on-JVM options
 - `notes/session05-code-signing-wall.md` — **[key result]** why custom code
   cannot run at boot (RRT signature enforcement)
+- `notes/session06-linux-workstation-migration.md` — Linux host setup,
+  udev/libusb, toolchain re-provision, resume the BootROM lane
+- `notes/session07-bootrom-protocol-first-contact.md` — live BootROM session;
+  claim fixed on Linux, `SetMode(1)` accepted, ping-first wedges the 9930
+- `notes/session08-firmware-acquisition.md` — Sprint 9930 OS 7.1.0.163 image
+  obtained + extracted (Java CODs, `rim0x05001204.sfi`, embedded ARM ELFs)
+- `notes/session09-apploader-and-firmware-toolchain.md` — RIM `Loader.exe` /
+  `RIMDeviceManager.exe` / `RimUsb.sys` acquired; `.sfi` container format;
+  RAMLoader command reference
+- `notes/session10-reversing-rim-device-manager.md` — host stack uses the
+  OS-session Desktop Channel (not BootROM channel0); recovered the RIM **MCT
+  flash partition map**
+- `notes/session11-bbos-update-protocol-and-cfp-format.md` — **[key result]**
+  BBOS update = HTTP CGI (`login/dynamicProperties/update.cgi`) over the device
+  link; CFP/RamImage image format + `SignedFileImage` signature boundary
 
 ## Layout
 

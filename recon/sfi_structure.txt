@@ -1,0 +1,63 @@
+file: /home/stanw47/Blackberry-9930-Research/rom/9930AllLang_v7.1.0.163_P5.1.0.137/CDMA/rim0x05001204.sfi
+size: 78194852
+
+== RIM magic map ==
+  0x00000034  0xD7A82D1F  code/load
+  0x0002B668  0xD7B02D1F  table
+  0x00146F2C  0xD7CC2D1F  addrtable
+  0x020694EE  0xD7C82D1F  RSA
+  0x024F10FA  0xD7A82D1F  code/load
+  0x039E5086  0xD7C82D1F  RSA
+  0x039E52B8  0xD7C82D1F  RSA
+  0x03A73B14  0xD7C82D1F  RSA
+  0x03F7D04C  0xD7C82D1F  RSA
+  0x04A9288C  0xD7C82D1F  RSA
+
+== named components ==
+  0x00017203  d.load.bin
+  0x00017588  ebi0_cs0.bin
+  0x000175A8  ebi0_cs1.bin
+  0x000175C8  ebi1_cs0.bin
+  0x000175E8  ebi1_cs1.bin
+  0x00017608  imem.bin
+  0x00017620  iram.bin
+  0x00017638  mdsprama.bin
+  0x00017660  mdspramb.bin
+  0x00017688  mdspramc.bin
+  0x000176AC  mdsprami.bin
+  0x000176D0  mdspregs.bin
+  0x000176F8  adsprama.bin
+  0x0001771C  adspramb.bin
+  0x00017740  adspramc.bin
+  0x00017764  adsprami.bin
+  0x00C031CA  xtra.bin
+  0x00F0C3F1  gpsoffsets.bin
+  0x0186F9EE  timers.bin
+  0x01EE3F07  hdr_heap.bin
+  0x02B3145A  qpimscommon.bin
+  0x02BA2B9E  qdi_oem.dll
+  0x02D31ABA  qpdplcommon.bin
+  0x034A91DA  vscr_res.bin
+  0x039E52DC  NFC_java.elf
+  0x03A6E50D  NFC_java.nometrics.elf
+  0x03A73B38  OlympiaWebKit.elf
+  0x03E4836F  0OlympiaWebKitLDLL.ldll
+  0x03F7D070  OlympiaWebKitLDLL.ldll
+  0x04721378  SaaS.elf
+  total: 30
+
+== signature algorithms ==
+  0x039E5090  RIMOS-ECC-SHA512
+  0x039E514C  RIMOS-ECC-SHA256
+  0x03A738EC  RIMOS-ECC-SHA512
+  0x03A739A8  RIMOS-ECC-SHA256
+  0x04A92664  RIMOS-ECC-SHA512
+  0x04A92720  RIMOS-ECC-SHA256
+
+== signature records ==
+  tag@0x020694EE RSA            size=180 ver=0x00010001 body@0x02069436
+  tag@0x039E5086 RSA            size=180 ver=0x00010001 body@0x039E4FCE
+  tag@0x039E52B8 RSA            size=180 ver=0x00010001 body@0x039E5200
+  tag@0x03A73B14 RSA            size=180 ver=0x00010001 body@0x03A73A5C
+  tag@0x03F7D04C RSA            size=180 ver=0x00010001 body@0x03F7CF94
+  tag@0x04A9288C RSA            size=180 ver=0x00010001 body@0x04A927D4
