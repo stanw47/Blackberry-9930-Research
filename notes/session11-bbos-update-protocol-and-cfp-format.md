@@ -44,6 +44,13 @@ password path (session02).
 → `IControlChannelConnection`; i.e. HTTP is tunnelled over RIM's USB Desktop
 Channel (the "Tunnel Manager"/"NCM Driver" pair seen in the host software list).
 
+The tunnel is **proprietary**: `RIMDeviceManager.exe` contains `SRPClient`
+(`SRPClient::Connect: Host "%s" @ [%d.%d.%d.%d]`) and `Patriot tunnel: %d` /
+`Patriot PRG Name: %s`. The device provides an IP path (the "Patriot tunnel")
+that the host-side SRP/HTTP client dials — **no standard USB-NIC (RNDIS/NCM)
+interface appears on Linux**, so carrying `update.cgi` from Linux means
+reimplementing the Patriot tunnel (or reversing `RimUsb.sys`).
+
 ## 2. The CFP firmware engine (namespace `RIM_CFP`)
 
 `RIMDeviceManager.exe` contains RIM's **CFP** ("Common Firmware Package"?)
