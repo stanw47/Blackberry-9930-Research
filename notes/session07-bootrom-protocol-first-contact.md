@@ -156,6 +156,23 @@ via **eMMC ISP/chip-off** to dump the boot partitions (the reliable route to
 the vulnerable bootloader, and the same methodology as `priv-research/
 classic-emmc`).
 
+### Update (2026-10-04, sessions 12+): BootROM mode names + flakiness
+
+- The BootROM's `SetMode` **does** accept the name `RIM-BootLoader` — reply
+  `0x08` (MODE_SELECTED) with the same mode table as the OS session. Every
+  other name (`RIM_JavaLoader`, `RIM Desktop`, `RIM_JVMDebug`, `RIM UPL`,
+  `RIM REINIT`, `RIM-BootNUKE`, …) returns `0x09` NOT_SELECTED.
+- So the only accepted BootROM mode is `RIM-BootLoader`; after it the device
+  streams a `0x09`/echo and stops servicing OUT (the session07 "wedge").
+- **Flakiness**: during one boot-window catch, the same session accepted
+  `ping` + 3 `SetMode`s before locking; on battery-out static BootROM it locks
+  after the first `ping` (which streams its `ECHO_REPLY` forever). Same framing
+  (bb10mt `mode`/`pkt` ≡ classic `socket`/`sequence`), so this is device-side
+  timing/state, not our protocol.
+- Net: the BootROM reliably yields ~1 command; there is no evidence of a usable
+  loader-upload path over USB on this unit. The classic/OS session is the only
+  stable USB channel, and it exposes no flash primitive (sessions 10–12).
+
 Two remaining cheap variants worth trying:
 
 1. **Battery IN.** All tests so far used battery-out to enter BootROM. With no
