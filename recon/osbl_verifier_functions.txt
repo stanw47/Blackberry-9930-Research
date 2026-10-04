@@ -47,3 +47,14 @@ Gate logic (FUN_40161B9C):
   if (*(u8*)(ctx+0x64)==0) return *(u8*)(ctx+0x6C); else return 1;
   ctx == *0x473003C0 (base 0x473003C8)
   ctx+0x64==0 && ctx+0x6C==0  => Ce_CodeSigning_verify accepts UNSIGNED module
+
+--- session18: JVM "secure" flag / config gate ---
+gate   FUN_40161B9C  return (ctx+0x64==0)? ctx+0x6C : 1   (logs "JVM: secure")
+app    FUN_40161C2C  secure || ctx+0x6D
+sec2   FUN_40161B68  (ctx+0x64==0) && (ctx+0x6C!=0)
+startup FUN_4015DC00 JVM start; reads property 0x32 -> ctx+0x64 (store 0)
+dispatch FUN_401593E4 Nessus debug cmd dispatch; cmd 0x3C/0x3D -> ctx+0x6C
+cfgRead FUN_40205FC0(store,id,&out)   cfgWrite FUN_402067D8/FUN_402067A8/FUN_402066E8
+cfgValid FUN_40205994  id must be < 0x4C
+property ids: 0x01 flags | 0x22 32B blob | 0x32 JVM secure | 0x47/0x48/0x4b recovery
+accept-unsigned <=> property 0x32==0 && ctx+0x6C==0
