@@ -17765,3 +17765,10 @@
 # JSC::JSArray typeinfo=0xD1ED70 vtables=0xD1E510,0xD1E618,0xD1EAB4,0xD41F20
 # JSC::ArrayPrototype typeinfo=0xD1E614 vtable=0xD3EE2C
 # Full RTTI map: recon/webkit_rtti_vtables.txt (2275 classes)
+
+# --- targeted decompile workflow (session22) ---
+# /tmp/opencode/ghidra_scripts/DecompRange.java <addr> <len>
+#   sets TMode=1, disassembles range, creates function, decompiles.
+#   project /tmp/opencode/ghidra_jsc (imported -noanalysis, fast).
+# Example: fcn.006871cc (0x6871cc, 364B) = array function w/ "Invalid array
+#   length." guard; Ghidra C shows JSValue tag handling + throw. (No bug seen.)
