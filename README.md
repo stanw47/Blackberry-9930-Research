@@ -39,6 +39,9 @@ the (u)nexplored paths to running custom code.
 - `notes/session14-hardware-and-software-surface-map.md` — **[map]** complete
   hardware inventory (`.sfi` build flags) + software surfaces + autoloader +
   ranked opportunities
+- `notes/session15-module-audit-sbinjector-autolaunch.md` — module audit:
+  `sbinjector`=resource bundle; `AutoLauncher` reads SD-card backup into
+  DeviceSwitch; app-delivery/FUMO push path
 
 ## Layout
 
