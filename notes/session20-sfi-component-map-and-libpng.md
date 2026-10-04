@@ -119,16 +119,68 @@ This matches the class of libpng integer-overflow fixes (CVE-2011-2690 /
 `rowbytes/pixel_depth == width` overflow check, this is a clean heap
 overflow primitive.
 
-## 7. Next steps
-1. Verify the row-allocation overflow check in
-   `png_read_start_row`/`png_calculate_rowbytes` (`FUN_496F7C08` + callers).
-   If absent -> craft PNG with `width≈0x40000001`, 8-bit RGBA -> rowbytes=4,
-   heap overflow.
-2. Audit `FUN_496FEE02` (`png_inflate`/`png_decompress_chunk`, CVE-2011-3026)
-   and `FUN_496FE532` (`png_do_read_transformations`, CVE-2011-2690).
-3. Identify which app loads this component (browser vs media/gallery) to
-   confirm reachability (open a PNG).
-4. Continue the component map (WebKit, GIF/TIFF, media) for more targets.
+## 7. Upstream CVE cross-check (authoritative)
+
+Pulled the real libpng sources/changelogs (network works from the host):
+`pngread.c`, `pngrutil.c`, `pngrtran.c`, `pngset.c` at tags
+1.2.44 / 1.2.46 / 1.2.47 / 1.2.48 / 1.2.49, plus `CHANGES`.
+
+**The IHDR width -> rowbytes candidate is NOT exploitable.** 1.2.44
+`png_read_start_row` (pngrutil.c:3327) does:
+```c
+row_bytes = ((width + 7) & ~7);
+row_bytes = PNG_ROWBYTES(max_pixel_depth, row_bytes) + 1;
+...
+if ((png_uint_32)row_bytes > (png_uint_32)(PNG_SIZE_MAX - 1))
+   png_error("Row has too many bytes to allocate in memory.");
+png_ptr->rowbytes = row_bytes;
+```
+The multiply wraps *consistently* (allocations and copies both wrap), so no
+controllable overflow. Dead end.
+
+**Post-1.2.44 security fixes (from CHANGES):**
+| version | fix | reachable from crafted PNG? |
+|---------|-----|------------------------------|
+| 1.2.45beta01 | uninit read in `png_format_buffer` (CVE-2004-0421 related) | info-leak |
+| 1.2.45beta02 | integer overflow in `png_set_rgb_to_gray()` (CVE-2011-2690) | **no** — coefficients are app-supplied, not file |
+| 1.2.45beta03 | sCAL too short | DoS |
+| 1.2.47rc01 | **CVE-2011-3026 buffer overrun** (iCCP-path `png_decompress_chunk` integer overflow) | **yes** |
+| 1.2.48beta01 | `png_handle_hIST` odd length; `png_inflate` int cast; `png_handle_sCAL` off-by-one OOB read | OOB read |
+| 1.2.49 | **CVE-2011-3048** `png_set_text_2` memory corruption (state restore on malloc fail) | hard (needs malloc failure) |
+
+**CVE-2011-3026 is the real one** and 1.2.44 is vulnerable (fixed only in
+1.2.47). Exact bug (`pngrutil.c`, `png_decompress_chunk`):
+```c
+expanded_size = png_inflate(png, chunkdata+prefix_size, chunklength-prefix_size, 0, 0);
+...
+if (expanded_size > 0) {
+   text = png_malloc_warn(png, prefix_size + expanded_size + 1);  // 32-bit sum can wrap
+   png_memcpy(text, chunkdata, prefix_size);                      // heap overflow
+   png_inflate(png, ..., text+prefix_size, expanded_size);
+}
+```
+The 1.2.47 fix adds:
+```c
+if (prefix_size >= (~(png_size_t)0) - 1 ||
+    expanded_size >= (~(png_size_t)0) - 1 - prefix_size) { ... }  // reject
+```
+**Trigger requirement:** `expanded_size` (true inflate output) must be
+≈ 2^32 − prefix_size, i.e. a **~4 GB zip-bomb** decompression (the first
+pass streams/discards through the ~8 KB `zbuf`, so RAM is fine; CPU/time is
+the cost — seconds to a minute on the 1.2 GHz MSM8655). Overflow length and
+content are attacker-controlled (`prefix_size` profile-name bytes copied from
+`chunkdata`). RIM's `FUN_496FEE02` matches this vulnerable
+`png_decompress_chunk`/`png_inflate` shape exactly.
+
+## 8. Assessment / next steps
+1. **libpng CVE-2011-3026** is a genuine heap-overflow primitive in the
+   shipped 1.2.44, but needs the 4 GB expansion. Next: confirm iCCP is
+   compiled in (chunk dispatcher `FUN_496f97c4` handles the `iCCP` tag) and
+   which app links this libpng; then test a crafted iCCP PNG on-device.
+2. If the 4 GB cost kills it, audit custom decoders instead:
+   **FASTJPEG entropy path** (`FUN_403D5A84` etc.), **GIF** (`0x526C14` +
+   component @0x498E5B1A), **TIFF/JPGDEC-EXIF** (`FUN_403D126C`).
+3. Keep the component map growing (WebKit `0x3A73B38`, media `0x3B80000+`).
 
 ## 7. Artifacts
 - Slice `/tmp/opencode/png/comp.bin` (file `0x24F10FA..0x2600000`),
