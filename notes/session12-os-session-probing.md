@@ -208,6 +208,24 @@ Notes:
 - Remaining: implement Barry's sequence/password handling to complete a data
   socket, and identify the tunnel that carries HTTP `update.cgi` on socket 8.
 
+### FETCH_ATTRIBUTE = device properties (socket 8)
+
+`FETCH_ATTRIBUTE(0x05)` on the Desktop socket returns the same property set as
+`GetVar` (the `object` field is ignored):
+
+| attr | bytes | content |
+|------|-------|---------|
+| 1 | 24 | serial `D71FD222…AAF275` |
+| 2 | 736 | BRMetrics (HW `0x05001204`, `ec_agent`, `Jul 7 2011`) |
+| 3 | 464 | **OS metrics** — `Aug 8 2013`, platform **`5.1.0.699`**, region table |
+| 4 | 12 | PIN `0x3321FC37` |
+| 7,8,10,11 | 8 | config words |
+
+An HTTP request pushed as a raw data packet on socket 8 was answered with a
+`SEQUENCE_HANDSHAKE` (`0x13`) rather than HTTP — so `update.cgi` is **not** a
+raw socket-8 tunnel; it rides a higher tunnel (session11) that still needs
+reversing.
+
 ## 10. Device survived
 
 Rebooted cleanly (`0x04`) and re-enumerated as `8004` in ~5 s after every probe.
