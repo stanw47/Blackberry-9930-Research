@@ -226,6 +226,27 @@ An HTTP request pushed as a raw data packet on socket 8 was answered with a
 raw socket-8 tunnel; it rides a higher tunnel (session11) that still needs
 reversing.
 
+### JavaLoader command format
+
+Two framings on the same endpoint:
+- **socket protocol** (`Packet{socket,size,cmd}+SocketCommand{socket,seq}`) —
+  used to `SELECT_MODE` / `OPEN_SOCKET`.
+- **`JLPacket`** (`[socket][size][cmd][unknown][param_size]`) — used for
+  JavaLoader commands on the opened socket (Barry `SB_JLPACKET_HEADER_SIZE`).
+
+With the correct `JLPacket` framing, on JavaLoader socket 6:
+
+```
+HELLO(0x64)        -> 0x13 SEQUENCE_HANDSHAKE, then a short ack
+DEVICE_INFO(0x71)  -> 0x13 SEQUENCE_HANDSHAKE, then 0x0B CLOSE_SOCKET
+GET_DIRECTORY(0x6D)-> timeout
+```
+
+So the device **enforces sequence numbers** (Barry `SocketZero::CheckSequence`
+/ `m_zeroSocketSequence`); a bare client without the sequence/password state
+machine gets the socket closed. Completing this is the remaining step for live
+JavaLoader (app/FS) access — the signing-walled Java layer.
+
 ## 10. Device survived
 
 Rebooted cleanly (`0x04`) and re-enumerated as `8004` in ~5 s after every probe.
