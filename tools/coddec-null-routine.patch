@@ -13,3 +13,23 @@ index e7dbeca..42db56d 100644
  							_source_.append(" // pc="+_routine_3_.getLocalCount());
  							if (_doNameCrap) {
  							_source_.append("   // get_name_1:  " + _routine_3_.get_name_1());
+diff --git a/src/net/rim/tools/compiler/codfile/DataSection.java b/src/net/rim/tools/compiler/codfile/DataSection.java
+index b5c8654..6129d40 100644
+--- a/src/net/rim/tools/compiler/codfile/DataSection.java
++++ b/src/net/rim/tools/compiler/codfile/DataSection.java
+@@ -854,6 +854,7 @@ public final class DataSection extends net.rim.tools.compiler.codfile.CodfileIte
+                 net.rim.tools.compiler.codfile.FixupTableEntry an1 = (net.rim.tools.compiler.codfile.FixupTableEntry)_routineFixups.elementAt(j1);
+                 net.rim.tools.compiler.codfile.MemberRef j2 = (net.rim.tools.compiler.codfile.MemberRef)an1.getItem();
+                 net.rim.tools.compiler.codfile.Member r1 = j2.getMember();
++                if (r1 == null) continue;
+                 int k1 = r1.getOffset();
+                 abyte1[0] = (byte)r1.getClassDef().getModule().getOrdinal();
+                 abyte1[1] = (byte)(k1 & 0xff);
+@@ -994,6 +995,7 @@ public final class DataSection extends net.rim.tools.compiler.codfile.CodfileIte
+                 net.rim.tools.compiler.codfile.FixupTableEntry an1 = (net.rim.tools.compiler.codfile.FixupTableEntry)_staticFieldsFixups.elementAt(j1);
+                 net.rim.tools.compiler.codfile.MemberRef j2 = (net.rim.tools.compiler.codfile.MemberRef)an1.getItem();
+                 net.rim.tools.compiler.codfile.Member r1 = j2.getMember();
++                if (r1 == null) continue;
+                 net.rim.tools.compiler.codfile.ClassDef u1 = j2.getClassDef();
+                 abyte1[0] = (byte)u1.getModule().getOrdinal();
+                 abyte1[1] = (byte)u1.getOrdinal();
