@@ -28,3 +28,7 @@ tools/*.log
 # OS cruft
 Thumbs.db
 desktop.ini
+
+# Decompiler output (derived; regenerate locally)
+decompiled/
+test.txt
