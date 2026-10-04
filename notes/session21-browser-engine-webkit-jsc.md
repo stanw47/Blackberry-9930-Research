@@ -29,6 +29,22 @@ Ghidra as ELF (ARM/Thumb) with correct segment mapping and entry point.
 **PCRE**, **IJG JPEG**, zlib. (Note: the app-component libpng is 1.2.44;
 the browser bundles 1.2.45.)
 
+## 2b. Version / build metadata
+
+- `.note.rim` build stamps: **`ec_agent`  `Dec 04 2011 19:54:09`** (WebKit) and
+  **`Dec 04 2011 19:53:57`** (JSC) + a build hash
+  (`9603f236…feed8a72 50032d2f`). So the native engine binaries were built
+  **Dec 2011** (WebKit ~535 era codebase) even though the firmware is
+  7.1.0.1066 (Aug 2013).
+- `net_rim_bb_browser_lib.cod` contains the UA template:
+  `... AppleWebKit/534.11+ (KHTML, like Gecko) Version/ ... Mobile Safari/534.11+`
+  -> the browser identifies as **AppleWebKit/534.11+** (early-2011 WebKit
+  lineage), with RIM backports.
+- JSC has the **JIT** (`/olympia/JavaScriptCore/jit/ExecutableAllocator.*`).
+
+Implication: the browser is a WebKit-534.x + JSC stack with a Dec-2011 build
+stamp, so a large fraction of 2011–2013 WebKit/JSC CVEs may still apply.
+
 ## 3. Why this is the best target
 
 - The BBOS browser is a full WebKit+JSC stack and is **remote-reachable**
