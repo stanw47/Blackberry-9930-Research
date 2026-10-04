@@ -1,0 +1,15 @@
+diff --git a/src/net/rim/tools/compiler/codfile/Code.java b/src/net/rim/tools/compiler/codfile/Code.java
+index e7dbeca..42db56d 100644
+--- a/src/net/rim/tools/compiler/codfile/Code.java
++++ b/src/net/rim/tools/compiler/codfile/Code.java
+@@ -1774,7 +1774,9 @@ implements net.rim.tools.compiler.vm.Constants
+ 							net.rim.tools.compiler.codfile.Routine _routine_3_ = (net.rim.tools.compiler.codfile.Routine)getObjectRef(_index_, 0);
+ 							//_routine_3_.writeMemberAddress(__output, _constants_[_index_] != 0);
+ 							//__output.writeByte(_routine_3_.getLocalCount(), "parmcount=", true);
+-							_source_.append(_routine_3_.get_Name());
++							if (_routine_3_ == null) { _source_.append("routine"); break; }
++							String _n3_ = _routine_3_.get_Name();
++							_source_.append(_n3_ == null ? "routine" : _n3_);
+ 							_source_.append(" // pc="+_routine_3_.getLocalCount());
+ 							if (_doNameCrap) {
+ 							_source_.append("   // get_name_1:  " + _routine_3_.get_name_1());
