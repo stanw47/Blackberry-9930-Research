@@ -85,3 +85,33 @@ stripped ARM build is a multi-week effort (revision ID, bug selection, heap
 grooming, ROP/JIT-spray, on-device iteration). The groundwork — readable
 native engine, component/load map, trigger mechanism, and the post-exploit
 signing bypass — is done and committed.
+
+---
+
+## 8. Browser audit progress (post-assessment)
+
+- JavaScriptCore function map: `recon/jsc_functions.txt` (17,746 fns).
+- RTTI typeinfo+vtable map: `recon/webkit_rtti_vtables.txt` (2,275 classes).
+- Array builtin atom anchors: `recon/jsc_functions.txt` tail.
+- **Audited the array length guard** (function containing `ADR "Invalid array
+  length."` @ `0x6872EE`, string @ `0x687688`):
+  ```
+  0x6872DC  vmov  s2, r6
+  0x6872E0  vcvt.f64.u32 d1, s2      ; d1 = (double)(uint32)len
+  0x6872E4  vcmp.f64 d0, d1          ; d0 == exact length?
+  0x6872E8  vmrs  APSR_nzcv, fpscr
+  0x6872EC  beq   0x687328           ; ok
+  0x6872EE  adr   r1, "Invalid array length."
+  ```
+  => the length check is **correct** (rejects fractional / >2^32 lengths).
+  Negative result: the easy "push length overflow" primitive is not present
+  in this routine.
+- Next audit targets (still open): `arrayProtoFuncSort`/`Splice` butterfly
+  growth, `JSArray::sort` comparator reentrancy, `arguments`/`CallFrame`,
+  Yarr regex, and `JSArrayBuffer`/TypedArray length handling.
+
+## 9. Status
+All reconnaissance/infrastructure is committed. Remaining work is sustained
+exploit development (bug identification -> primitives -> ROP/JIT-spray ->
+on-device iteration), which is a multi-session effort. Post-exploitation
+(the session-17 signing bypass) is already fully understood.
