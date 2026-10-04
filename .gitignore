@@ -1,0 +1,30 @@
+# Large, re-downloadable binaries / toolchains (see README > Toolchain)
+tools/BlackBerry_JDE_7.1.0.exe
+tools/BlackBerry_JDE_7.1.0_payload.cab
+tools/jde71/
+tools/jde71_full/
+tools/zulu6/
+tools/zulu6.zip
+tools/zadig-2.9.exe
+tools/rapcjar_x/
+tools/rapcjar_all/
+rom/
+
+# Third-party tool clones (README lists the source URLs)
+tools/coddec/
+tools/bb-tools/
+tools/BBHTool/
+
+# Secrets / certificates / signing material
+*.csk
+*.key
+id_rsa
+*.pfx
+*.pem
+*.db
+tools/bootrom_winusb/
+tools/*.log
+
+# OS cruft
+Thumbs.db
+desktop.ini

@@ -1,0 +1,17 @@
+MIDlet-Name: WSSBootTest
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: Williamson Security Solutions
+MIDlet-Jar-URL: WSSBootTest.jar
+MIDlet-Jar-Size: 4716
+MIDlet-Description: WSS autostart boot module test
+MicroEdition-Profile: MIDP-2.0
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: WSSBootTest,,
+RIM-MIDlet-Flags-1: 1
+Manifest-Version: 1.0
+RIM-COD-URL: WSSBootTest.cod
+RIM-COD-Size: 2292
+RIM-COD-Creation-Time: 942069600
+RIM-COD-Module-Name: WSSBootTest
+RIM-COD-Module-Dependencies: net_rim_cldc
+RIM-COD-SHA1: 19 3e 55 78 50 06 11 3e f2 07 6b fb 20 54 7c 0e ec 02 b5 bc
