@@ -13,7 +13,15 @@ Flows verified on the device:
     SELECT_MODE(0x07,"RIM_JavaLoader") -> MODE_SELECTED(0x08) socket 6
     OPEN_SOCKET(0x0A) -> OPENED_SOCKET(0x10)
     ECHO(0x01) -> ECHO_REPLY(0x02)  (ticks echoed)
-    HELLO(0x64) -> SEQUENCE_HANDSHAKE(0x13)
+    HELLO(0x64) -> SEQUENCE_HANDSHAKE(0x13) + JL_READY(0x01)
+    FETCH_ATTRIBUTE(0x05,socket 8) -> device properties (serial/metrics/PIN)
+
+Two framings share the endpoint:
+    socket protocol (pkt())  - SELECT_MODE / OPEN_SOCKET / ECHO / attributes
+    JavaLoader     (jl())    - HELLO / GET_DIRECTORY / COD load on an open socket
+The device enforces sequence numbers via SEQUENCE_HANDSHAKE (0x13); the host
+must sync (reset_seq()) and, for full JL, implement Barry's password/sequence
+state machine. Each SELECT_MODE needs a fresh device state (USB reset).
 
 Each mode selection needs a fresh device state (USB reset) first.
 
@@ -40,11 +48,24 @@ CMDS = {
 
 
 def pkt(target, command, extra=b'', outer=0):
+    """Socket protocol: [outer][size][cmd][target][seq][extra] (seq auto)."""
     seq = _seq[0]
     _seq[0] = (_seq[0] + 1) & 0xFF
     size = 8 + len(extra)
     return (struct.pack('<HHB', outer, size, command)
             + struct.pack('<H', target) + bytes([seq]) + extra)
+
+
+def jl(sock, command, unknown=0, param_size=0, data=b''):
+    """JavaLoader data packet on an opened socket:
+       [sock][size][cmd][unknown][param_size][data]."""
+    return (struct.pack('<HHBBH', sock, 8 + len(data), command, unknown, param_size)
+            + bytes(data))
+
+
+def reset_seq():
+    """Call after a device SEQUENCE_HANDSHAKE (cmd 0x13)."""
+    _seq[0] = 0
 
 
 def _open():
