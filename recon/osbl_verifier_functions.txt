@@ -1,0 +1,49 @@
+OSBL native code-signing verifier map
+source image: rom/9930AllLang_v7.1.0.163_P5.1.0.137/CDMA/rim0x05001204.sfi
+load base: 0x40000000  (address = base + file_offset)
+disassembly: Ghidra ARM:LE:32:v7, raw binary import
+
+Address (addr)  file_off   name / role
+---------------- ---------- ------------------------------------------------
+0x401657D4      0x0157D4   init ctx pointer: *0x473003C0 = 0x473003C8
+0x401657E8      0x0157E8   ctx init (sets +0x4288, +0xFC=1, +0x1A0=0)
+0x40161B9C      0x0161BC   ENFORCEMENT GATE: reads ctx+0x64 / ctx+0x6C
+0x4016A754      0x016A754  bootstrap fallback -> returns 1 (accept)
+0x4016A214      0x016A214  verifySigsBeforeLoad
+0x4016A7A0      0x016A7A0  Ce_CodeSigning_verify (keyId -> key table, bitmasks)
+0x401697C4      0x01697C4  "hashes verified" / "hashes verification failed!"
+0x4019040C      0x019040C  bootstrap module init ("not signed by RIM" -> ret 0x4d)
+0x40190400      0x0190400  -> FUN_4016AD44
+0x4016AD44      0x016AD44  -> FUN_4016A7A0(keyId=0x33, key=0x404EB631, len=0x80)
+0x401669A4      0x01669A4  returns ctx const 0x473046AC
+0x401520F0      0x01520F0  module handle -> index lookup
+0x4016925C      0x016925C  enumerate module signatures
+0x40166C20      0x0166C20  fetch module hash (0x58 bytes)
+0x401EFD70      0x01EFD70  verify wrapper -> FUN_4021A7D4
+0x4021A7D4      0x021A7D4  verify dispatch (RSA 0x80/0x80 or ECC 0x16/0x2A)
+0x4021A5F0      0x021A5F0  RSA-1024 PKCS#1 v1.5 SHA-1 verify (strict)
+0x4021A4C4      0x021A4C4  ECC verify (via 0x40346...)
+
+RSA code-signing public keys (keyId -> blob addr, file offset = addr-0x40000000)
+  0x33   / "3"   0x404EB631
+  "RBB"  0x424252 0x404EB2B1
+  "RCC"  0x434352 0x404EB331
+  "RCR"  0x524352 0x404EB3B1
+  "RRT"  0x545252 0x404EB531   <-- live boot "no sig from 0x545252"
+  "BBSA" 0x41534242 0x404EB1B1
+  "BBID" 0x44494242 0x404EB131
+  "RCI"  0x494352 0x404EB6B1
+  "RBA"  0x414252 0x404EB831
+  "RBSK" 0x4B534252 0x404EB8B1
+  "RRTT" 0x54545252 0x404EB9B1
+  "WKDB" 0x42444B57 0x404EBA31
+  "UACC" 0x43434155 0x404EB5B1
+  "CTPC" 0x43505443 0x404EB731
+  "RODP" 0x50444F52 0x404EB4B1
+  "NFCR" 0x5243464E 0x404EB231
+  "RIBB" 0x42444952 0x404EB931
+
+Gate logic (FUN_40161B9C):
+  if (*(u8*)(ctx+0x64)==0) return *(u8*)(ctx+0x6C); else return 1;
+  ctx == *0x473003C0 (base 0x473003C8)
+  ctx+0x64==0 && ctx+0x6C==0  => Ce_CodeSigning_verify accepts UNSIGNED module
