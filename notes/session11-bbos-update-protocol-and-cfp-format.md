@@ -51,6 +51,24 @@ that the host-side SRP/HTTP client dials — **no standard USB-NIC (RNDIS/NCM)
 interface appears on Linux**, so carrying `update.cgi` from Linux means
 reimplementing the Patriot tunnel (or reversing `RimUsb.sys`).
 
+### SRP transport (reversed from `RIMDeviceManager.exe`)
+
+`SRPClient::Connect` (`FUN_00483560`) does `socket(AF_INET, SOCK_STREAM)` →
+`gethostbyname` → `connect(host, port)`, i.e. the Desktop/update channel is
+**TCP**, to a host:port that the Patriot tunnel maps to the device over USB.
+`SRPClient::SendPacket`/`ReceivePacket` then frame messages over that socket
+(packet header + body), with a command set from the log strings:
+
+```
+CONFIG, PING/PING_RESPONSE, DATA, DATA_ACK, RECEIVE, RETURN, RESEND,
+SUBMITTED, STATUS, plus an Authentication handshake (client/server digest).
+```
+
+So to drive `update.cgi` from Linux we need: (1) the USB-level **Patriot
+tunnel** that presents the device's IP (proprietary; not RNDIS/NCM), and (2)
+the **SRP** framing on top. This is the current frontier; `RimUsb.sys` and the
+tunnel setup in `RIMDeviceManager` are the places to reverse next.
+
 ## 2. The CFP firmware engine (namespace `RIM_CFP`)
 
 `RIMDeviceManager.exe` contains RIM's **CFP** ("Common Firmware Package"?)
