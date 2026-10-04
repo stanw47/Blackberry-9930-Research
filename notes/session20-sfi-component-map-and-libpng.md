@@ -84,13 +84,51 @@ The most promising for code exec is CVE-2011-3026 (heap overflow) or
 CVE-2011-2690 (transform overflow). `FUN_496FEE02` and `FUN_496FE532` are the
 functions to audit first.
 
-## 6. Next steps
-1. Audit `FUN_496FEE02` (`png_inflate`/decompress) for the CVE-2011-3026
-   integer-overflow conditions; and `FUN_496FE532` for CVE-2011-2690.
-2. Identify which app loads this component (browser vs media/gallery) to
+## 6. Candidate bug: IHDR width overflow -> rowbytes integer overflow
+
+`png_check_IHDR` = `FUN_496F6B4E`. Each validation issue calls a callback and
+sets the "invalid" flag `bVar1`, except the large-width check:
+
+```c
+if (0x1fffff7e < width) {                      // 536870782
+    FUN_496F7182(png, "Width is too large for libpng to process pixels");
+    // NOTE: bVar1 = true is NOT set here
+}
+```
+`FUN_496F7182` is the **warning** path: it reaches the callback at
+`png_ptr+0x184` (warning_fn); the fatal path (`FUN_496F706C`, `FUN_496F7084`)
+reaches `png_ptr+0x180` (error_fn). So an over-large width is only warned.
+
+`png_handle_IHDR` = `FUN_496FEFEE` then does:
+
+```c
+width = be32(ihdr); if (width > 0x7fffffff) error("PNG unsigned integer out of range.");
+bpp   = bit_depth * channels;
+rowbytes = (bpp < 8) ? ((width*bpp + 7) >> 3) : (width * (bpp >> 3));   // 32-bit
+*(png + 0x218) = rowbytes;
+```
+For RGBA/8-bit (`bpp=32`) a width in `(0x3fffffff, 0x7fffffff]` makes
+`rowbytes` wrap (e.g. width `0x40000000` -> rowbytes `0`), while later row
+decode writes `width*4` bytes per row -> heap overflow **if** no downstream
+overflow check. The guard threshold `0x1fffff7e` is only correct for 8-bit
+and is non-fatal anyway.
+
+This matches the class of libpng integer-overflow fixes (CVE-2011-2690 /
+2011-3328 family). **Next:** verify `png_read_start_row` /
+`png_calculate_rowbytes` (`FUN_496F7C08` region) — if it lacks the
+`rowbytes/pixel_depth == width` overflow check, this is a clean heap
+overflow primitive.
+
+## 7. Next steps
+1. Verify the row-allocation overflow check in
+   `png_read_start_row`/`png_calculate_rowbytes` (`FUN_496F7C08` + callers).
+   If absent -> craft PNG with `width≈0x40000001`, 8-bit RGBA -> rowbytes=4,
+   heap overflow.
+2. Audit `FUN_496FEE02` (`png_inflate`/`png_decompress_chunk`, CVE-2011-3026)
+   and `FUN_496FE532` (`png_do_read_transformations`, CVE-2011-2690).
+3. Identify which app loads this component (browser vs media/gallery) to
    confirm reachability (open a PNG).
-3. Continue extending the component map to the other `0x49610000`-based
-   regions / WebKit for more targets.
+4. Continue the component map (WebKit, GIF/TIFF, media) for more targets.
 
 ## 7. Artifacts
 - Slice `/tmp/opencode/png/comp.bin` (file `0x24F10FA..0x2600000`),
