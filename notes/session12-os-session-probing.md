@@ -184,6 +184,30 @@ Barry's `SocketZero::SendOpen`/`CheckSequence`/password logic ported. The
 `RIM Desktop` socket (8) is the channel the AppLoader's HTTP `update.cgi`
 rides on (session11).
 
+### Working classic client (`tools/bb_classic.py`)
+
+Ported Barry's framing (little-endian): `[outer u16][size u16][cmd u8]
+[target u16][seq u8][extra]`. Verified live:
+
+```
+SELECT_MODE "RIM Desktop"    -> 0x08 MODE_SELECTED (socket 8)
+SELECT_MODE "RIM_JavaLoader" -> 0x08 MODE_SELECTED (socket 6)
+OPEN_SOCKET(sock)            -> 0x10 OPENED_SOCKET
+ECHO(0x01, 8 bytes)          -> 0x02 ECHO_REPLY (ticks echoed)
+HELLO(0x64) on socket 6      -> 0x13 SEQUENCE_HANDSHAKE
+FETCH_ATTRIBUTE(0x05)        -> 0x06 FETCHED_ATTRIBUTE
+```
+
+Notes:
+- The device is **little-endian**; bblink's "mode"/"pkt" are just the classic
+  `target socket`/`sequence` bytes.
+- **Each SELECT_MODE needs a fresh device state** — selecting again without a
+  reboot returns `0x09`/`0x00`. A USB `reset()` clears it.
+- JL commands (`0x71` DEVICE_INFO etc.) returned `0x00` on the Desktop socket
+  (8); they belong to the JavaLoader socket (6), where HELLO is answered.
+- Remaining: implement Barry's sequence/password handling to complete a data
+  socket, and identify the tunnel that carries HTTP `update.cgi` on socket 8.
+
 ## 10. Device survived
 
 Rebooted cleanly (`0x04`) and re-enumerated as `8004` in ~5 s after every probe.
