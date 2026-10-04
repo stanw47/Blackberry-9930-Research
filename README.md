@@ -32,6 +32,13 @@ the (u)nexplored paths to running custom code.
 - `notes/session11-bbos-update-protocol-and-cfp-format.md` — **[key result]**
   BBOS update = HTTP CGI (`login/dynamicProperties/update.cgi`) over the device
   link; CFP/RamImage image format + `SignedFileImage` signature boundary
+- `notes/session12-os-session-probing.md` — live OS session: classic socket
+  protocol, mode map (explains the BootROM wedge), GetVar/attributes
+- `notes/session13-offline-decompile-trust-bug-hunt.md` — coddec fix; the RRT
+  signing wall is native, not in the Java CODs
+- `notes/session14-hardware-and-software-surface-map.md` — **[map]** complete
+  hardware inventory (`.sfi` build flags) + software surfaces + autoloader +
+  ranked opportunities
 
 ## Layout
 
