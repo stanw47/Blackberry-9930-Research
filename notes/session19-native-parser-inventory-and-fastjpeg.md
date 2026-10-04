@@ -87,3 +87,39 @@ We now have the exact native decoders and their addresses, offline, with a
 working Ghidra workflow. The FASTJPEG parser is more careful than expected;
 the entropy/scanline path and the old libpng/zlib are the better bets for a
 memory-corruption primitive. This remains a large exploit-dev effort.
+
+---
+
+## 6. CORRECTION (later in session 19): the image is mostly **Thumb‑2**, not data
+
+Initial prologue scan only looked for **ARM** (32‑bit) prologues and wrongly
+classified huge regions as data. Re-scanning for Thumb prologues
+(`push {r4-r7,lr}` = `F0 B5`, etc.) shows the `.sfi` is dominated by
+**Thumb‑2 native code**:
+
+- Boot/OSBL/early OS (`0x000000`–`0x010000`) and the JVM/native verifier
+  (`0x140000`–`0x4C0000`) are **ARM** (this is why sessions 17–18 decompiled
+  cleanly as ARM).
+- App/libraries are **Thumb‑2**: e.g. `0x0B80000`–`0x2000000` (large code
+  block), `0x24C0000`–`0x3500000` (libpng, browser, UI), `0x3A00000`–
+  `0x3B80000`, `0x3D00000`–`0x3E0000` (media), `0x3F80000`–`0x45C0000`,
+  `0x4640000`–`0x4A80000`.
+- Confirmed Thumb prologue at `0x424CBE6A` (`push {r4,r5,r6,r7,lr}`).
+- `FASTJPEG` (`0x3D0000`+) is **ARM**, so the session‑19 FASTJPEG audit is
+  valid as-is.
+
+**Consequence:** much more of the OS is statically analyzable than session 13
+believed — the browser/WebKit, libpng 1.2.44, GIF/TIFF, media, and UI stacks
+are present as Thumb‑2 code. Static import must force Thumb mode
+(Ghidra `TMode=1` context, or `r2/rizin -b 16`) or the code decodes as
+garbage (Ghidra's default ARM import produced no xrefs in `0x24C0000+`).
+
+Tooling note: `r2 -a arm -b 16 -m <base>` decodes the Thumb regions;
+`anal.armthumb` is not a valid key in r2 5.9.8 (removed/renamed).
+
+### Revised next steps
+1. Re-import the app/library regions in **Thumb mode** and locate the libpng
+   1.2.44 code; check the known CVEs (CVE-2011-2690/2692/3026/3048,
+   CVE-2013-6954) against the actual code.
+2. Do the same for WebKit (`OlympiaWebKit.elf`) and the GIF/TIFF decoders.
+3. Re-check earlier "not found" xrefs now that Thumb decoding is enabled.
