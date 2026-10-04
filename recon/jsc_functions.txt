@@ -17755,3 +17755,13 @@
 #   ExecutableAllocator.cpp, runtime/Collector.cpp, yarr/RegexInterpreter.cpp,
 #   interpreter/RegisterFile.cpp, parser/JSParser.cpp; RTTI names
 #   N7WebCore13JSArrayBufferE etc. (use vtable/typeinfo to find ctors).
+
+# --- array builtin anchors (session22) ---
+# StaticString/atom table near vaddr 0xC3BA00 (RO):
+#   splice str@0xDB29C9 -> ref@0xC3BA7C
+#   push   str@0xDB2A1E -> ref@0xC3BA18
+#   unshift str@0xDB2A35 -> ref@0xC3BA90
+#   sort   str@0xDB2A49 -> ref@0xC3BA68
+# JSC::JSArray typeinfo=0xD1ED70 vtables=0xD1E510,0xD1E618,0xD1EAB4,0xD41F20
+# JSC::ArrayPrototype typeinfo=0xD1E614 vtable=0xD3EE2C
+# Full RTTI map: recon/webkit_rtti_vtables.txt (2275 classes)
