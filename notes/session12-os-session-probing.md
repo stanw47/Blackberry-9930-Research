@@ -162,6 +162,28 @@ socket/sequence encoding and the correct open handshake still need pinning
 down (Barry's `SocketZero::SendOpen` + `CheckSequence`). Recovered with a USB
 `reset()`.
 
+## 9c. Mode byte = socket id; classic protocol live
+
+The byte after the SetMode reply command is the **socket id** of the selected
+mode:
+
+```
+RIM_JavaLoader -> mode/socket 0x06
+RIM_JVMDebug   -> 0x07
+RIM Desktop    -> 0x08
+```
+
+Opening that socket with `OPEN_SOCKET` (`0x0A`) elicits real classic-protocol
+replies: a `SEQUENCE_HANDSHAKE` (`0x13`, body `00000000`) and/or
+`OPENED_SOCKET` (`0x10`). e.g. selecting `RIM Desktop` then
+`OPEN_SOCKET(socket 8)` produced `... 10 08 00 02` = `OPENED_SOCKET`.
+
+Conclusion: the OS session speaks **RIM's classic socket protocol** (Barry).
+Driving it fully (open → password challenge → data socket → JL/HTTP) needs
+Barry's `SocketZero::SendOpen`/`CheckSequence`/password logic ported. The
+`RIM Desktop` socket (8) is the channel the AppLoader's HTTP `update.cgi`
+rides on (session11).
+
 ## 10. Device survived
 
 Rebooted cleanly (`0x04`) and re-enumerated as `8004` in ~5 s after every probe.
