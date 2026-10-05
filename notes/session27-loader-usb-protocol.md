@@ -141,6 +141,31 @@ discovery time (session24e), not a compile-time string.
 4. Re-test the JavaLoader `loaderDebugMode` (0x70) → modified-COD install cleanly
    (session25 was inconclusive).
 
+## 7b. Connection object decode (addendum)
+
+`loaderConnect` uses the connection object whose vtable is `0x904B84`:
+```
++0x00 0x581c90 open      +0x08 0x5812f0 query(byte==1)   +0x20 0x586390 (ret 1)
++0x04 0x581a50 close     +0x0c 0x581320 HELLO            +0x2c 0x586260 recv
++0x14 0x5823a0 ...       +0x34 0x586310 send             +0x38 0x586360 flush
+```
+`loaderConnect` (0x57ABD0) order: create `0x581c40` → `vtable[0x20]` →
+`vtable[0x00]` (open) → `vtable[0x08]` (query) → `vtable[0x0c]` (**HELLO**).
+`vtable[0x0c]` (`0x581320`) sends `0x64` and expects `0x65` — the JavaLoader
+HELLO/HELLO_ACK. So the loader connection is JavaLoader-like and does a HELLO
+after open.
+
+**Live addendum (full JavaLoader handshake, then loader opcodes with the
+ChannelPacket framing):**
+```
+0x92 (NvStoreDump)          -> timeout
+0x11 (DeletePersistentStore)-> 050008006f000000  (resp 0x6F = rejected)
+0x9a (Bork)                 -> timeout
+```
+So `0x11` is *parsed* by the JavaLoader channel but rejected (`0x6F`); the
+loader's own channel (RIM Bypass / the named channel) is where these opcodes are
+serviced, and it needs its connect sequence (BootImage handshake) first.
+
 ## 8. Safety
 
 The probe tools send only read-only opcodes and USB-reset before/after.
