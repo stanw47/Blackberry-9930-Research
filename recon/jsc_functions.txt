@@ -17772,3 +17772,16 @@
 #   project /tmp/opencode/ghidra_jsc (imported -noanalysis, fast).
 # Example: fcn.006871cc (0x6871cc, 364B) = array function w/ "Invalid array
 #   length." guard; Ghidra C shows JSValue tag handling + throw. (No bug seen.)
+
+# --- array builtin function table (session24f) ---
+# table @0xC3BA18 stride 0x14: {name_ptr, len=0x14, func_ptr(thumb|1), flags, 0}
+#   push   str@0xDB2A1E  func=0x677E17
+#   sort   str@0xDB2A49  func=0x6782DD   (real addr 0x6782DC)
+#   splice str@0xDB29C9  func=0x6785BD
+#   unshift str@0xDB2A35 func=0x6788B7
+# arrayProtoFuncSort (0x6782DC): selection sort. Length uVar8 fetched ONCE at
+#   start; inner loop calls the comparator (arbitrary JS) then swaps via the
+#   array vtable get(+0x3c)/put(+0x44) using indices checked against the cached
+#   length. A comparator that shrinks the array makes the cached length stale
+#   (classic sort-reentrancy divergence). Exploitability depends on
+#   JSArray::get/putByIndex bounds handling (needs deeper audit).
