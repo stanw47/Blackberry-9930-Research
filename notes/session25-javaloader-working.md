@@ -102,3 +102,30 @@ The device locks into the selected mode: after a JavaLoader session, all
 SELECT_MODE calls return 0x09 and only a **phone reboot** resets it. Run each
 test as ONE clean session after a reboot; releasing the USB interface alone
 does not reset the mode.
+
+---
+
+## 9. Install is SIGNATURE-CHECKED (definitive)
+
+Live test (`tools/bb_jl_install.py`, module `net_rim_bis_client_res` 1128 B):
+- read backup: 1128/1128 OK
+- **UNMODIFIED** install: SET_COD_SIZE ACK, all SEND_DATA chunks ACK (0x64)
+- **MODIFIED** (one byte flipped): SET_COD_SIZE ACK, SEND_DATA -> **0x6F**
+
+=> `0x6F` = signature/integrity error. The device verifies the COD signature
+on install via the JavaLoader. The direct "install unsigned COD" path is
+closed.
+
+### Consequence for root
+The CMM signature check (`Ce_CodeSigning_verify`, session 17) is gated by the
+JVM "secure" flag (NVS property 0x32). If that flag is 0, `Ce_CodeSigning_verify`
+accepts unsigned modules -> the JavaLoader install would then accept an
+unsigned COD. So the chain is:
+   set NVS property 0x32 = 0  ->  JavaLoader installs an unsigned COD  ->  root.
+We now need a way to write the NVS flag (the loader's `0x92` NvStoreDump is a
+read and returned 0x6F via the JavaLoader channel).
+
+### JavaLoader still gives us
+- module/filesystem enumeration + **read** (any installed module),
+- erase / wipe / reset-factory,
+- device info, metrics, event logs, screenshot, set-time.
