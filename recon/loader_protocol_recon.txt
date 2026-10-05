@@ -109,3 +109,18 @@ tools/bb_ch0_enum.py sent channel0 cmd 0x00 to the OS session; the phone
 immediately dropped off USB ("port state: not attached") and did NOT
 re-enumerate after ~8 min. Needs a physical replug/power-cycle. Cmd 0x00 is
 now blacklisted (with 0x03/0x0C) in the tool.
+
+=== session24c: RimUsb driver IOCTLs (BbDevMgr USB transport) ===
+BbDevMgr.exe uses DeviceIoControl on the RimUsb device handle.
+IOCTL codes (FILE_DEVICE 0x22 = custom) and their code sites:
+  0x222038 used @ 0x4191F1, 0x4192A1, 0x419354
+  0x22203C used @ 0x41947A
+  0x222044 used @ 0x418F9B
+  0x222048 used @ 0x41914E
+  0x22204E used @ 0x41A409, 0x41A4E3
+  0x222054 used @ 0x4194F4
+Method-name strings (ATL/COM): WritePacket@0x486C40, ReadPacket@0x486BF0,
+  OpenChannel@0x486C58, GetWriteQueueInfo@0x487308, Channel_300@0x47D259,
+  DeviceIoControl import @0x46E5F8.
+Note: BbDevMgr x86 COM code decompiles poorly from mid-function starts;
+  full function-boundary analysis needed for the transport internals.
