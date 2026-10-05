@@ -70,13 +70,14 @@ def readpkt(d, tmo=4000, verbose=True):
     while True:
         try: raw = bytes(d.read(EP_IN, 0x10000, timeout=tmo))
         except usb.core.USBTimeoutError:
-            if verbose: print("  timeout"); return None
+            if verbose: print("  timeout")
+            return None
         if len(raw) >= 5 and raw[4] == SB_SEQUENCE_HANDSHAKE:
             if verbose: print("  (seq handshake)")
             continue
         return raw
 
-def read_response(d, tmo=4000, verbose=True):
+def read_response(d, tmo=8000, verbose=True):
     ack = readpkt(d, tmo, verbose)
     if ack is None or len(ack) < 8: return ack, b''
     resp = ack[4]; expect = struct.unpack_from('<H', ack, 6)[0]
@@ -85,7 +86,8 @@ def read_response(d, tmo=4000, verbose=True):
     while len(data) < expect:
         p = readpkt(d, tmo, verbose)
         if p is None: break
-        data += p
+        # data packets are [socket u16][size u16][payload...]; strip header
+        data += p[4:] if len(p) >= 4 else p
     return ack, data
 
 class JL:
