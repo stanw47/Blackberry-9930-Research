@@ -82,3 +82,30 @@ Channel protocol implemented in "USB Drivers/BbDevMgr.exe" (COM service, imageba
 => Stack: Loader API -> 4B-header packets -> usb_transport (WritePacket/ReadPacket)
    -> RIMDeviceManager -> RimUsb bulk -> device. BbDevMgr implements the channel
    layer (OPEN/AUTH/DATA/TERM) over the USB pipe.
+
+=== session24b: BbDevMgr channel protocol enumeration ===
+Opcode name table @0x470840 (index = opcode):
+  0 RESET_REPLY        1 INFO_REQUEST       2 INFO_REPLY
+  3 CHANNEL_OPEN_REQUEST   4 CHANNEL_OPEN_ACK   5 CHANNEL_OPEN_NAK
+  6 CHANNEL_OPEN_READY 7 CHANNEL_TERM_REQUEST 8 CHANNEL_TERM_ACK
+  9 CHANNEL_TERM_NAK   10 CHANNEL_AUTH_CHALLENGE 11 CHANNEL_AUTH_RESPONSE
+  12 CHANNEL_AUTH_SUCCESS 13 CHANNEL_AUTH_FAILURE 14 CHANNEL_QOS_REQUEST
+  15 CHANNEL_QOS_REPLY 16 DEVICE_FAILURE    17 CHANNEL_AUTH_RESPONSE_NO_UI
+  18 QUERY_INFO_REQUEST 19 QUERY_INFO_REPLY 20 LARGE_MESSAGE
+  21 CHANNEL_AUTH_CHALLENGE2 22 CHANNEL_TERM_ALL 23 INFO_EXTENDED_REQUEST
+  24 INFO_EXTENDED_REPLY 25-27 UNKNOWN CODE1-3
+  28 CHANNEL_AUTH_RESPONSE2 29 CHANNEL_AUTH_FAILURE2
+(second copy of the table at 0x47D3E0, likely the logging/name table)
+BbDevMgr imports: SETUPAPI (device enum), WS2_32 (Winsock - VSP/IP),
+  ADVAPI32 crypto (CryptGenKey/Encrypt/Decrypt = auth challenge),
+  ole32/OLEAUT32 (COM), USER32/KERNEL32.
+=> channel layer: OPEN(3-6) / TERM(7-9,22) / AUTH(10-13,17,21,28,29) /
+   QOS(14,15) / INFO(1,2,18,19,23,24) / LARGE_MESSAGE(20) / DEVICE_FAILURE(16).
+Still to recover: channel packet header layout, RimUsb bulk framing,
+auth crypto scheme (CHANNEL_AUTH_CHALLENGE/RESPONSE).
+
+=== LIVE DEVICE NOTE ===
+tools/bb_ch0_enum.py sent channel0 cmd 0x00 to the OS session; the phone
+immediately dropped off USB ("port state: not attached") and did NOT
+re-enumerate after ~8 min. Needs a physical replug/power-cycle. Cmd 0x00 is
+now blacklisted (with 0x03/0x0C) in the tool.
