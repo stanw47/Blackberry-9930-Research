@@ -2276,3 +2276,14 @@ N7WebCore9TimerBaseE                           typeinfo=0x00D26784 vtables=0x00D
 N7WebCore9WebSocketE                           typeinfo=0x00D26790 vtables=0x00DB08BC,0x00DB0950,0x00DB0978
 
 ### OlympiaWebKit.elf (WebKit/WebCore) ###
+
+# --- session24g: browser branch + CVE target list ---
+# BBOS 7 browser = fork of WebKit safari-534-branch (r87712, May 2011),
+# UA AppleWebKit/534.11+, engine binaries built Dec 2011.
+# Candidate WebKit 534.x CVEs (Safari < 5.0.6 / 5.1):
+#   CVE-2011-1344  WBR-tag UAF (Pwn2Own 2011, text nodes)  [WebCore]
+#   CVE-2011-0221 / 0232 / 0234 / 1453  WebKit memory corruption
+#   CVE-2011-1774  libxslt improper security settings (arbitrary file write)
+#   CVE-2011-1290  CSS nodeset integer overflow (BlackBerry KB26132, BBOS6)
+# Strategy: fork safari-534-branch, diff against shipped code, or pick a
+#   bug fixed in WebKit 535/536 (2012) that the Dec-2011 fork lacks.
