@@ -134,6 +134,7 @@ tools/        scripts written for this research (Python / PowerShell)
 - `notes/session23-loader-flash-capability.md` — AppLoader flash/partition capability
 - `notes/session25-javaloader-working.md` — **[key result]** RIM JavaLoader working live
 - `notes/session26-sachesi-and-bbos7-autoloader-research.md` — Sachesi & BBOS 7 autoloader research
+- `notes/session27-loader-usb-protocol.md` — **[key result]** Loader opcode map + ChannelPacket protocol (live)
 
 ### Toolchain (NOT committed — re-create per machine)
 

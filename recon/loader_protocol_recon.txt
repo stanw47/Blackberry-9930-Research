@@ -172,3 +172,27 @@ Next (live, when phone returns):
    2. On success, send loader packets [opcode][flags][u16 len][payload]
       (e.g. 0x92 = NvStoreDump) and read replies.
    3. If RIMDeviceConfig opens, probe config/NV read/write opcodes.
+
+=== session27: opcode map + ChannelPacket LIVE (see notes/session27-loader-usb-protocol.md) ===
+Loader API opcode map (from Loader.exe exports):
+  loaderDebugMode 0x70 | loaderSaveModule 0x7e | loaderResetToFactory 0x91 |
+  loaderNvStoreDump 0x92 | loaderDeletePersistentStore 0x11 | loaderBork 0x9a |
+  loaderRecoverFlash 0x89 | loaderActivateWAFs 0x8f,0x81
+CORRECTION: RimBBBWriteNessus* are backup-manifest XML writers, NOT NVS writes.
+
+Wire protocol = Barry ChannelPacket: [socket u16][TOTAL size u16][data...]
+  size = 4 + len(data).  Response = per-send sequence packet (0x13).
+  (An earlier framing with size=data length gave no reply; size must be total.)
+
+Channel: SELECT_MODE sweep -> only RIM Bypass/Desktop/JavaLoader/JVMDebug select.
+  "RIM Bypass" = socket 8 and advertises max data 0x3FFC => the RawChannel mode.
+  DesktopMgr/RIMDeviceConfig/RIMDeviceFileAccess/BlackBerry_Backup/BBPIN = 0x09.
+
+LIVE (2026-10-05):
+  RIM Bypass sock=8  TX=0800050092 -> 00000c001308010001000000 (seq ACK)
+  RIM Desktop sock=7 TX=0700050092 -> 00000c001307010001000000 (seq ACK)
+  => device accepts loader ChannelPackets; first live loader exchange from Linux.
+
+Blocker: loaderConnect (0x57ABD0) does conn->vtable[0x08]/[0x0c] BootImage
+handshake (state machine @0x5c1880; tunnel parser @0x5d21c9 / @0x5d3287) before
+opcodes are serviced. Next: decode that handshake, or build Barry RawChannel.
