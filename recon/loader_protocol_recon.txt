@@ -45,3 +45,40 @@ DeviceUpdate.dll: usb_transport (RimUsb bulk R/W) + DeviceIPControlChannel
    methods to recover the tunnel opcodes and flash commands.
 2. Recover the tunnel packet layout (u32 length + opcode + payload).
 3. Reimplement on Linux over the device USB bulk endpoints.
+
+=== session24: loader protocol stack (thorough) ===
+Loader.exe (PE32 x86, imagebase 0x400000):
+  exports (78) include: loaderConnect 0x57ABD0, loaderNvStoreDump 0x57FCD0,
+    loaderResetToFactory 0x57F1D0, loaderRecoverFlash 0x580070,
+    loaderLoadModule 0x57CB00, loaderSaveModule 0x57CFE0,
+    loaderDeleteModule 0x57C3D0, loaderDeletePersistentStore 0x57C640,
+    loaderBork 0x57F290, loaderGetBootromMetrics 0x57DAF0,
+    loaderGetOSMetrics 0x57D9C0, loaderGetDeviceInfo 0x57D7D0,
+    loaderActivateWAFs 0x57EF50, loaderDebugMode 0x57C4C0,
+    loaderJavaDump, loaderScreenDump, loaderLogStackTraces, loaderSetTime,
+    CreateLoaderRpc* (COM/RPC).
+  connection object: factory FUN_00581c40 -> vtable 0x904B84
+    +0x00 open 0x581C90 (CoInitializeEx + CoCreateInstance CLSID {BA3D0120-E617-4F66-ADCA-585CC2FB86DB})
+    +0x04 close 0x581A50, +0x2C recv 0x586260, +0x34 send 0x586310, +0x38 flush 0x586360
+  packet framing (send/recv wrappers): 4-byte header; u16 payload length at +2.
+  loaderNvStoreDump: sends opcode byte 0x92 then reads NVS bytes; response
+    markers 'd'/'n'/0.
+Transport CLSID {BA3D0120-...} implemented in DeviceUpdate.dll (imagebase 0x10000000):
+  usb_transport::connect creates RIMDeviceManager COM (OpenChannel/get_Params/
+    OnChallengeEx); usb_transport::send = WritePacket, recv = ReadPacket.
+  DeviceIPControlChannel = HTTP CGI (login/challenge/dynamicProperties/update)
+    via WinHTTP over the Patriot tunnel.
+USB driver: RimUsb.sys (rimusbbulkrwr.c), bulk read/write.
+Channel protocol implemented in "USB Drivers/BbDevMgr.exe" (COM service, imagebase 0x400000):
+  classes: _Channel, ControlChannel (vtable 0x45BBF4), ChannelWorker
+    (vtable 0x45B180), ChannelConsumer, ChannelCallback, CVSPConnection,
+    _DeviceManager, _Device/_Devices/_Disk(s)/_IntMSDisk/_IntMTPDisk,
+    CVSPMgr, CBbClientManager, CEmulatorManager.
+  opcodes: CHANNEL_OPEN_REQUEST/ACK/NAK/READY, CHANNEL_AUTH_CHALLENGE(2)/
+    RESPONSE(2)/RESPONSE_NO_UI/SUCCESS/FAILURE(2), CHANNEL_TERM_REQUEST/ACK/NAK/ALL,
+    CHANNEL_QOS_REQUEST/REPLY, CONTROL_DATA_PACKET.
+  events: EVENT_CHANNEL_CONNECT/CLOSE, EVENT_DATA_IN/OUT, EVENT_CONTROL_DATA_OUT,
+    EVENT_INTERNAL_* (read/send/write complete), EVENT_NOTIFY_*, EVENT_TRIGGER_READ.
+=> Stack: Loader API -> 4B-header packets -> usb_transport (WritePacket/ReadPacket)
+   -> RIMDeviceManager -> RimUsb bulk -> device. BbDevMgr implements the channel
+   layer (OPEN/AUTH/DATA/TERM) over the USB pipe.
