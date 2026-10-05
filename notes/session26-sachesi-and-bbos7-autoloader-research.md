@@ -74,3 +74,23 @@ Source: github.com/xsacha/Sachesi (GPL3, released 2014, "Dingleberry" lineage).
    `DocsToGo`) -> `0x64` = userland unchecked (root), `0x6F` = checked.
 2. If checked: unpack the autoloader `.exe` to look for any unsigned region.
 3. Revisit the `.sfi` SBL verifier for the "not signed -> skip" flaw.
+
+---
+
+## 6. Third-party app test result (live)
+
+Modified `MobileMarket_LibPlugin.cod` (third-party, 1288 B) via the JavaLoader:
+SET_COD_SIZE ACK, SEND_DATA -> **0x6F** (signature rejected), same as a RIM
+system module.
+
+=> BBOS 7 signature-checks **all** CODs (system and third-party); the
+   "userland app" analogue is closed. The Sachesi `User`-image trick has no
+   BBOS 7 equivalent because BBOS 7 autoloaders carry no unsigned image.
+
+### Remaining autoloader-related angles
+1. The `.sfi` (CFP/RamImage) is signed ECDSA P-521; the **host-side** CFP
+   verifier has a "not signed -> skip" path (session 11). If the **device-side**
+   SBL (`boot_auth_if`) shares it, a modified `.sfi` (all-0xFF signature
+   records) would boot -> custom native code in the `.sfi` app component.
+   Delivery is the blocker (update.cgi / Patriot tunnel).
+2. Unpack the autoloader `.exe` to check for any unsigned region.
