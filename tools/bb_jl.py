@@ -66,7 +66,7 @@ def drain(d):
         try: d.read(EP_IN, 0x10000, timeout=200)
         except usb.core.USBTimeoutError: return
 
-def readpkt(d, tmo=1500, verbose=True):
+def readpkt(d, tmo=4000, verbose=True):
     while True:
         try: raw = bytes(d.read(EP_IN, 0x10000, timeout=tmo))
         except usb.core.USBTimeoutError:
@@ -76,7 +76,7 @@ def readpkt(d, tmo=1500, verbose=True):
             continue
         return raw
 
-def read_response(d, tmo=2500, verbose=True):
+def read_response(d, tmo=4000, verbose=True):
     ack = readpkt(d, tmo, verbose)
     if ack is None or len(ack) < 8: return ack, b''
     resp = ack[4]; expect = struct.unpack_from('<H', ack, 6)[0]
@@ -107,15 +107,24 @@ class JL:
         self.d.write(EP_OUT, pkt(self.sock, SB_OPEN_SOCKET), timeout=2000)
         r = readpkt(self.d)
         if not (r and len(r) >= 5 and r[4] == 0x10): raise RuntimeError("open failed: %s" % (r.hex() if r else None))
-        drain(self.d)
-        # HELLO
-        self.d.write(EP_OUT, jlcmd(self.sock, JL_HELLO), timeout=2000)
-        ack, _ = read_response(self.d)
+        drain(self.d); time.sleep(0.3)
+        # HELLO (retry up to 3x)
+        ack = None
+        for _ in range(3):
+            self.d.write(EP_OUT, jlcmd(self.sock, JL_HELLO), timeout=2000)
+            ack, _ = read_response(self.d, verbose=False)
+            if ack and ack[4] == JL_HELLO_ACK: break
+            time.sleep(0.4); drain(self.d)
         if not (ack and ack[4] == JL_HELLO_ACK): raise RuntimeError("hello failed: %s" % (ack.hex() if ack else None))
-        # SET_UNKNOWN1
-        self.d.write(EP_OUT, jlcmd(self.sock, JL_SET_UNKNOWN1, 0, 1), timeout=2000)
-        self.d.write(EP_OUT, jldata(self.sock, b'\x00'), timeout=2000)
-        ack, _ = read_response(self.d)
+        # SET_UNKNOWN1 (cmd + 1 data byte)
+        time.sleep(0.2)
+        ack = None
+        for _ in range(3):
+            self.d.write(EP_OUT, jlcmd(self.sock, JL_SET_UNKNOWN1, 0, 1), timeout=2000)
+            self.d.write(EP_OUT, jldata(self.sock, b'\x00'), timeout=2000)
+            ack, _ = read_response(self.d, verbose=False)
+            if ack and ack[4] == JL_ACK: break
+            time.sleep(0.4); drain(self.d)
         if not (ack and ack[4] == JL_ACK): raise RuntimeError("unknown1 failed: %s" % (ack.hex() if ack else None))
         return self.sock
     def cmd(self, cmd, data=b'', unknown=0, verbose=True):
@@ -147,11 +156,28 @@ def main(argv):
                 ack, data = jl.cmd(c)
                 print("   data(%d): %s" % (len(data), data[:120].hex()))
         elif cmd in ("cmd", "cmds"):
+            args = [a for a in argv[2:] if not a.startswith("+")]
+            payload = b''
             for a in argv[2:]:
+                if a.startswith("+"):
+                    payload = bytes.fromhex(a[1:])
+            for a in args:
                 c = int(a, 0)
-                print("== cmd 0x%02X ==" % c)
-                ack, data = jl.cmd(c)
-                print("   data(%d): %s" % (len(data), data[:200].hex()))
+                print("== cmd 0x%02X%s ==" % (c, (" +" + payload.hex()) if payload else ""))
+                ack, data = jl.cmd(c, payload)
+                print("   data(%d): %s" % (len(data), data[:300].hex()))
+        elif cmd == "dir":
+            ack, data = jl.cmd(0x6d)
+            ids = [struct.unpack_from('>H', data, i)[0] for i in range(4, len(data) - 1, 2)]
+            print("root entry ids (%d): %s" % (len(ids), ' '.join('%04X' % i for i in ids)))
+        elif cmd == "entry":
+            eid = int(argv[2], 0)
+            ack, data = jl.cmd(0x6e, struct.pack('>H', eid))
+            print("entry 0x%04X data(%d): %s" % (eid, len(data), data[:400].hex()))
+        elif cmd == "subdir":
+            eid = int(argv[2], 0)
+            ack, data = jl.cmd(0x7d, struct.pack('>H', eid))
+            print("subdir 0x%04X data(%d): %s" % (eid, len(data), data[:400].hex()))
         jl.close()
     finally:
         try: usb.util.release_interface(jl.d, 0)
