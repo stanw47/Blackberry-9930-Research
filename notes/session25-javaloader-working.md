@@ -166,3 +166,24 @@ Walls:
 Next (after a phone restart, one clean session):
 1. SET_UNKNOWN1(1) -> read token -> install MODIFIED COD -> check 0x64 vs 0x6F.
 2. If still checked: look for the NV write / test RESET_FACTORY effect.
+
+---
+
+## 12. Debug-mode result (session 25 end)
+
+Clean session (fresh boot):
+- baseline MODIFIED install (debug off) -> SET_COD_SIZE ACK, SEND_DATA -> **0x6F**
+  (signature rejected) — reproduced.
+- SET_UNKNOWN1(1) this time -> ACK (no token), then install timed out.
+The 272-byte "BBID" token seen earlier appears state-dependent (returned when
+0x70=1 is sent right after the handshake, before other commands).
+
+So: the COD signature check is enforced on install; `SET_UNKNOWN1` (0x70) is a
+debug/engineering toggle that sometimes returns a 272-byte "BBID" token whose
+purpose (likely an authorization handshake) is not yet understood.
+
+### Root chain status
+install unsigned COD  <= requires =>  JVM "secure" flag (NVS prop 0x32) = 0
+                                        OR a debug/authorization bypass
+We have: full JavaLoader (read/install/erase/wipe/reset/debug), module backup,
+signature wall confirmed. Missing: NVS write primitive or debug token use.
