@@ -151,3 +151,24 @@ Loader.exe 0x655F80 uses WinINet HTTP (InternetOpen/Connect/HttpOpenRequest/
    Linux and we can send the loader's 4-byte-header packets directly.
    Next (live): test channel names ("DesktopMgr", "RIM Desktop",
    "RIMDeviceFileAccess", ...) with brawchannel once the phone is back.
+
+=== session24e: loader channel open mechanism (definitive) ===
+usb_device::acquire_transport (FUN_10055c50) allocates 0x60 and calls
+  usb_transport ctor (FUN_100552c0(this, owner, wchar_t* channelName, param3)).
+usb_transport ctor stores: this+0x3c=param3, this+0x40=std::string(channelName).
+usb_transport::connect then OpenChannel(name=this+0x40, params,...) on the
+  RIMDeviceManager COM (IID {1434DD3D-0AF6-41E0-BB71-8C86010D9AF5}).
+=> the channel name is a *device property* supplied at discovery time
+   (usb_device::get_device_property), not a compile-time constant.
+Barry's Mode::Open(password,name) == Controller::SelectMode(type,name), i.e.
+   the channel is opened by sending SELECT_MODE with the channel name (the
+   classic protocol we already speak). RawChannel = that + [socket,size,data]
+   packets.
+Candidate channel names seen in the host stack:
+   DesktopMgr, RIMDeviceConfig, RIMDeviceFileAccess, BlackBerry_Backup, BBPIN.
+Next (live, when phone returns):
+   1. `SetMode("<name>")` for each candidate; a selected reply (0x08) means the
+      USBPort channel exists. Start with DesktopMgr / RIMDeviceConfig.
+   2. On success, send loader packets [opcode][flags][u16 len][payload]
+      (e.g. 0x92 = NvStoreDump) and read replies.
+   3. If RIMDeviceConfig opens, probe config/NV read/write opcodes.
