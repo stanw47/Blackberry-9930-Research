@@ -124,3 +124,30 @@ Method-name strings (ATL/COM): WritePacket@0x486C40, ReadPacket@0x486BF0,
   DeviceIoControl import @0x46E5F8.
 Note: BbDevMgr x86 COM code decompiles poorly from mid-function starts;
   full function-boundary analysis needed for the transport internals.
+
+=== session24d: transport / channel name (from DeviceUpdate.dll) ===
+usb_transport::connect (FUN_100b3260, DeviceUpdate.dll imagebase 0x10000000):
+  CoCreateInstance IID {1434DD3D-0AF6-41E0-BB71-8C86010D9AF5} ("RIMDeviceManager")
+  -> IPersistStreamInit; get_Params; get property 0xf001;
+  -> OpenChannel(name=this+0x40, params, alloc) at iface vtable+0x10.
+Strings: "DesktopMgr" (DeviceUpdate 0x100ECAF8, Loader 0x91EA58),
+  "RIMDeviceFileAccess", "[_internal_connect] Error opening desktop channel",
+  "RimDeviceManager Version: %s Path: %s".
+Loader.exe 0x655F80 uses WinINet HTTP (InternetOpen/Connect/HttpOpenRequest/
+  SendRequest/QueryInfo) with verb @0x91EA54 and object "DesktopMgr" @0x91EA58
+  => "DesktopMgr" is the HTTP host/path of the desktop channel over the
+  Patriot tunnel (matches session11), not necessarily a USBPort channel name.
+
+=== KEY: open-source Barry implements the channel/USB protocol on Linux ===
+/tmp/opencode/barry (github.com/NetDirect/barry):
+  src/m_raw_channel.cc/.h  -> RawChannel: named USBPort channel over the
+     classic socket protocol. ChannelPacket = [socket u16][size u16][data]
+     (header 4 bytes, max data 0x3FFC). Open(name,password); Send/Receive.
+  src/controller.cc        -> SelectMode: "RIM Desktop"/"RIM_JavaLoader"/
+     "RIM_JVMDebug"/"RIM Bypass"; RawChannel needs explicitModeName.
+  tools/brawchannel.cc     -> pipes a named channel over STDIN/STDOUT.
+  doc/www/rawchannel.php   -> device side = net.rim.device.api.system.USBPort.
+=> If the loader's channel is a named USBPort channel, Barry can open it from
+   Linux and we can send the loader's 4-byte-header packets directly.
+   Next (live): test channel names ("DesktopMgr", "RIM Desktop",
+   "RIMDeviceFileAccess", ...) with brawchannel once the phone is back.
