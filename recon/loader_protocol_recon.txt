@@ -1,0 +1,47 @@
+Application Loader (Loader.exe) protocol recon
+source: rom/apploader/Loader.exe (PE32 x86, imagebase 0x400000, 5 sections)
+tool: rizin; Ghidra project /tmp/opencode/ghidra_loader (imported -noanalysis)
+Ghidra workflow: DecompRange.java (x86-safe; skips TMode if absent)
+
+--- key strings (file off, vaddr) ---
+"Bad tunnel packet length."                      off 0x511C0C  vaddr 0x91320C
+"Bad tunnel packet received (less than 4 bytes)." off 0x511C28  vaddr 0x913228
+".\NessusProgrammer.cpp"                         off 0x5009D8  vaddr 0x901FD8
+"NessusProgrammer"                               off 0x5009F0  vaddr 0x901FF0
+RTTI ".?AVNessusProgrammer@@"                    off 0x5E6298  vaddr 0x9E7A98
+
+--- code xrefs (absolute push) ---
+"Bad tunnel packet length." referenced at code vaddr 0x4D21C9
+  (function is a large programmer state machine using this+0x174/0x17c/0xd8/0xe0;
+   fields this+0x174 == 5 / == 2 branch on device/bootrom state)
+".\NessusProgrammer.cpp" referenced at vaddrs 0x5723EB, 0x5729B2?, 0x572ACC,
+  0x572B10, 0x572B53 (NessusProgrammer methods)
+
+--- programmer family (RTTI) ---
+ARMProgrammer IntelProgrammer BuiltInProgrammer QNXProgrammer
+NessusProgrammer PatriotProgrammer HTTPProgrammer DeviceProgrammer
+RIM_CFP::PatriotTransport / PatriotProgrammer / PatriotFileImage /
+  PatriotSBEPInterface_{Condor,Falcon,Orion} / PatriotTMPInterface
+SecureChannel / SecureChannelImpl
+Bootrom types: ARMBootrom, BuiltIn bootrom, Intel bootrom, QNX-ARM bootrom,
+  BOOT_PATRIOT / BOOT_PATRIOT_COMPLETE
+
+--- capabilities (from strings) ---
+PagePartition / PageErase / PartitionCtrl / UMPFilePartition
+Asynchronous Flash Read/Write Test; Block Erase Error
+Boot0 MMC / Boot1 MMC block ranges; ACTIVE MCT NAND
+CRYPTED_FLASH_DUMP (CDUMP_ERROR_CODE)
+RimBBBWriteNessusInfo / RimBBBWriteNessusDatabaseInfo /
+  RimBBBWriteNessusStorageUnitInfo
+loaderGetBootromMetrics; Requesting BootImage Handshake; HANDSHAKE failed;
+  Unsupported Opcode
+
+--- transport ---
+DeviceUpdate.dll: usb_transport (RimUsb bulk R/W) + DeviceIPControlChannel
+(HTTP CGI over Patriot tunnel). RimUsb.sys source: ...\rimusbbulkrwr.c.
+
+--- next ---
+1. Ghidra-decompile the 0x4D21xx state machine + 0x5723xx NessusProgrammer
+   methods to recover the tunnel opcodes and flash commands.
+2. Recover the tunnel packet layout (u32 length + opcode + payload).
+3. Reimplement on Linux over the device USB bulk endpoints.
