@@ -24,7 +24,7 @@
 | Codename | `9930` |
 | SoC | Qualcomm **MSM8655** (Snapdragon S2) |
 | OS / software | **BBOS 7.1** (Java CLDC/MIDP) |
-| Current build | 7.1.0.1066 (device) / 7.1.0.163 (Sprint firmware acquired) |
+| Current build | **7.1.0.1066**, Bundle **2879** (Sprint; 7.1.0.163 firmware acquired) |
 | Previous builds | — |
 | Carrier / unlock | **Sprint** (device is carrier-relevant; no bootloader unlock) |
 | SIM | single |
@@ -55,10 +55,10 @@ OS update protocol decoded. The only remaining door to custom code is the
 
 ## Achieved
 
-- ✅ **RRT signing wall documented** — why custom code cannot run at boot.
-- ✅ **BootROM protocol reached** (`bblink`-compatible, bulk EPs `0x02/0x82`).
-- ✅ **Complete hardware/software surface map** with ranked opportunities.
-- ✅ **Firmware + update pipeline decoded** end-to-end.
+- **RRT signing wall documented** — why custom code cannot run at boot.
+- **BootROM protocol reached** (`bblink`-compatible, bulk EPs `0x02/0x82`).
+- **Complete hardware/software surface map** with ranked opportunities.
+- **Firmware + update pipeline decoded** end-to-end.
 
 ## In Progress
 
@@ -80,12 +80,13 @@ OS update protocol decoded. The only remaining door to custom code is the
 
 ## Community Activity
 
-- The BBOS community's "custom ROM" practice is **hybrid OS** — recombining
-  RIM-signed modules; no root/unlock has been achieved in the Java layer.
+- BBOS modding is centred on **hybrid OS** builds - recombining RIM-signed
+  `.cod` modules - which does not yield privileged code.
 - The **2014 bootloader disclosure** and the **PlaidCTF simulator** are the key
   prior art; no public bootloader exploit exists for the 9930.
-
----
+- The community still maintains **free network-unlock guides** (carrier unlock,
+  not bootloader) and OS archives (last official 7.1.0.1047 / Bundle 2840).
+- Hubs: CrackBerry, XDA.
 
 ## Repository layout
 
