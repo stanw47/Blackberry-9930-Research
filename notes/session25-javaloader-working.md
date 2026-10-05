@@ -81,3 +81,24 @@ BlackBerry Desktop Manager / Application Loader uses):
 ## 6. Artifacts
 - `tools/bb_jl.py` (working client), `recon/loader_protocol_recon.txt`.
 - Live logs: `/tmp/opencode/nvdump*.log`, `/tmp/opencode/entry*.log`.
+
+---
+
+## 7. Module READ verified (live)
+
+Full read flow works in a clean single session:
+```
+SET_COD_FILENAME "net_rim_m2g" -> ACK(expect=2) + id 0x0003
+SAVE_MODULE(0x0003)            -> ACK(expect=4) + size = 99984 bytes
+loop SEND_DATA(0x68):
+   resp 0x6e (GET_DATA_ENTRY) + expect=N -> data packet (payload N, COD bytes)
+   resp 0x64 (ACK) -> done
+```
+Data begins with the COD magic `DEC0FFFF`; chunks are 0x7F8 bytes.
+=> we can **read any installed module** (backup primitive).
+
+## 8. Session-state caveat
+The device locks into the selected mode: after a JavaLoader session, all
+SELECT_MODE calls return 0x09 and only a **phone reboot** resets it. Run each
+test as ONE clean session after a reboot; releasing the USB interface alone
+does not reset the mode.

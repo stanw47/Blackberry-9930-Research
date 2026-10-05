@@ -148,7 +148,7 @@ class JL:
 
 def main(argv):
     cmd = argv[1] if len(argv) > 1 else "probe"
-    jl = JL(reset=True)
+    jl = JL(reset=("--reset" in argv))
     try:
         sock = jl.select_open()
         print("JavaLoader socket=0x%04X" % sock)
