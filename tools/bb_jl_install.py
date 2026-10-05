@@ -65,31 +65,39 @@ def main(argv):
     open(out, 'wb').write(got)
     print("backup read %d/%d bytes -> %s" % (len(got), size, out))
 
+    # ---- install helper ----
+    def install(data, label):
+        print("== install %s (%d bytes) ==" % (label, len(data)))
+        send(0x67, struct.pack('>I', len(data)), 1); time.sleep(0.3)
+        a = ack(); print("   SET_COD_SIZE resp:", a.hex() if a else None)
+        if not (a and a[4] == 0x64):
+            print("   SET_COD_SIZE rejected"); return None
+        CH = 0x7F8; off = 0; last = None
+        while off < len(data):
+            chunk = data[off:off + CH]; off += len(chunk)
+            send(0x68, chunk); time.sleep(0.15)
+            a = ack()
+            if a is None:
+                print("   send timeout at %d" % off); return None
+            last = a
+            if a[4] != 0x64:
+                print("   send resp 0x%02X at %d" % (a[4], off)); return a[4]
+        print("   all chunks ACKed (%d/%d)" % (off, len(data)))
+        return 0x64
+
+    # ---- install UNMODIFIED (protocol check) ----
+    r_orig = install(got, "UNMODIFIED")
+    print("UNMODIFIED result: %s" % (hex(r_orig) if r_orig is not None else "none"))
+
     # ---- modify one byte and install ----
     if len(got) < 16: print("too short to modify"); return
     mod = bytearray(got)
     pos = len(mod) // 2
     print("flipping byte at 0x%X: 0x%02X -> 0x%02X" % (pos, mod[pos], mod[pos] ^ 0xFF))
     mod[pos] ^= 0xFF
-    data = bytes(mod)
-    print("== SET_COD_SIZE %d ==" % len(data))
-    send(0x67, struct.pack('>I', len(data)), 1); time.sleep(0.3)
-    a = ack(); print("   resp:", a.hex() if a else None)
-    if not (a and a[4] == 0x64):
-        print("   SET_COD_SIZE rejected"); return
-    CH = 0x7F8
-    off = 0
-    while off < len(data):
-        chunk = data[off:off + CH]; off += len(chunk)
-        send(0x68, chunk)
-        time.sleep(0.15)
-        a = ack()
-        if a is None:
-            print("   send timeout at %d" % off); break
-        if a[4] != 0x64:
-            print("   send resp 0x%02X at %d" % (a[4], off)); break
-    print("install attempt finished at %d/%d" % (off, len(data)))
-    print("RESULT: if no signature error above, the unsigned COD was accepted")
+    r_mod = install(bytes(mod), "MODIFIED (signature broken)")
+    print("MODIFIED result: %s" % (hex(r_mod) if r_mod is not None else "none"))
+    print("=> if UNMODIFIED=0x64 and MODIFIED!=0x64, the signature check is ENFORCED")
 
 try:
     usb.util.release_interface(jl.d, 0)
