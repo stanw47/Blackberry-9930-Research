@@ -129,3 +129,40 @@ read and returned 0x6F via the JavaLoader channel).
 - module/filesystem enumeration + **read** (any installed module),
 - erase / wipe / reset-factory,
 - device info, metrics, event logs, screenshot, set-time.
+
+---
+
+## 10. `SET_UNKNOWN1` is a debug-mode toggle (returns a token)
+
+`loaderDebugMode(bool)` in Loader.exe sends JavaLoader `SET_UNKNOWN1` (0x70)
+with a **1-byte boolean**:
+```
+0x70 psize=1 <bool>
+```
+- handshake uses value 0.
+- value **1** -> device responds `0x6E` (data) with a **272-byte token**
+  (contains ASCII "BBID"; structure begins `01008400 33000000 ...`).
+  Saved: /tmp/opencode/debug_token.bin
+
+So 0x70 = "debug/engineering mode" enable; it returns an authorization/token
+blob. Whether enabling it disables the COD signature check is the open
+question (test was inconclusive due to session desync — the device keeps the
+mode and only a reboot resets it).
+
+## 11. Where the campaign stands (session 25)
+
+Working, live, from Linux:
+- full JavaLoader session (select/open/HELLO/UNKNOWN1/commands)
+- DeviceInfo (PIN), OS/BootROM metrics, GET_DIRECTORY, GET_DATA_ENTRY,
+  SET_COD_FILENAME, **module READ** (any installed module), install (signed
+  only), erase/wipe/reset-factory available, debug-mode toggle + token.
+
+Walls:
+- install is **signature-checked** (modified COD -> 0x6F)
+- root therefore needs the JVM "secure" flag (NVS property 0x32) = 0, or a
+  debug-mode signature bypass (to be tested cleanly), or a loader-channel NV
+  write.
+
+Next (after a phone restart, one clean session):
+1. SET_UNKNOWN1(1) -> read token -> install MODIFIED COD -> check 0x64 vs 0x6F.
+2. If still checked: look for the NV write / test RESET_FACTORY effect.
