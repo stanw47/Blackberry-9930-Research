@@ -166,6 +166,38 @@ So `0x11` is *parsed* by the JavaLoader channel but rejected (`0x6F`); the
 loader's own channel (RIM Bypass / the named channel) is where these opcodes are
 serviced, and it needs its connect sequence (BootImage handshake) first.
 
+## 7c. The loader sits behind the RIMDeviceManager (BbDevMgr) channel layer
+
+The loader does **not** open a USBPort mode directly. `usb_transport::connect`
+(`DeviceUpdate.dll`) calls the **RIMDeviceManager COM** `OpenChannel(name)` with
+names `DesktopMgr`, `RIMDeviceFileAccess`, `RIMDeviceConfig`,
+`BlackBerry_Backup` (`Loader.exe` / `DeviceUpdate.dll` strings). These are
+**not** `SELECT_MODE` names — the live sweep confirms every one returns
+`NOT_SELECTED (0x09)`, including the 16-byte-truncated forms.
+
+So the loader stack is four layers:
+```
+Loader API  ->  ChannelPacket [socket][size][data]
+            ->  RIMDeviceManager named channel (OpenChannel "RIMDeviceFileAccess")
+            ->  BbDevMgr channel protocol  (CHANNEL_OPEN_REQUEST/AUTH/DATA over RimUsb)
+            ->  device
+```
+`BbDevMgr.exe` implements the channel layer; its opcode table (`@0x470840`) is
+`RESET_REPLY, INFO_REQUEST/REPLY, CHANNEL_OPEN_REQUEST/ACK/NAK/READY,
+CHANNEL_TERM_*, CHANNEL_AUTH_CHALLENGE/RESPONSE/SUCCESS/FAILURE(+2/NO_UI),
+CHANNEL_QOS_*, DEVICE_FAILURE, QUERY_INFO_*, LARGE_MESSAGE, INFO_EXTENDED_*`.
+It talks to the RimUsb device via `DeviceIoControl` (custom IOCTLs
+`0x222038/0x22203C/0x222044/0x222048/0x22204E/0x222054`; the last group appears
+to carry the channel name string).
+
+The device-side mode table (`.sfi`) only contains `RIM Desktop`,
+`RIM_JavaLoader`, `RIM_JVMDebug` (`@RIM Desktop` marker), so the named channels
+are a RIMDeviceManager-internal mapping onto those modes.
+
+**Conclusion:** obtaining a loader/NVS write primitive from Linux requires
+reimplementing the BbDevMgr channel protocol (open + optional auth + data
+framing) — a substantial, multi-session RE effort, not a quick win.
+
 ## 8. Safety
 
 The probe tools send only read-only opcodes and USB-reset before/after.
