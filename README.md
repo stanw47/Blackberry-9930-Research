@@ -35,11 +35,15 @@
 ## Current Status
 
 Recon complete and the **code-signing boundary mapped**: BBOS runs as removable
-RIM-signed Java `.cod` modules gated by the **RIM Runtime (RRT) signature**;
-RIM's signing servers are offline, so unsigned/privileged modules cannot be
-installed. The BootROM (`bblink`) protocol has been reached, and firmware + the
-OS update protocol decoded. The only remaining door to custom code is the
-**boot chain** (2014-class bootloader weakness), not the Java layer.
+RIM-signed Java `.cod` modules gated by the **native verifier
+`Ce_CodeSigning_verify`** (keyId `RRT`), which lives in the `.sfi` image — not
+in the Java layer. Unsigned modules are accepted only when NVS property `0x32`
+("JVM secure") is `0`, and RIM's signing servers are offline, so unsigned
+modules cannot be signed. The **JavaLoader device-management channel now works
+live** from Linux (module read / install / erase — install is signature-checked),
+and the best custom-code surface is the **WebKit + JavaScriptCore browser**
+(ARM ELFs, Dec-2011 build) reachable via a local `file://` page. BootROM
+channel0 is a dead end for this unit.
 
 ---
 
@@ -62,7 +66,10 @@ OS update protocol decoded. The only remaining door to custom code is the
 
 ## In Progress
 
-- **BootROM lane** — resume live BootROM sessions toward a boot-chain path.
+- **Browser (WebKit/JSC) lane** — the primary custom-code path; needs a matching
+  2011–2013 bug + weaponization. Post-exploit is understood (flip NVS `0x32`).
+- **Loader USB protocol** — reverse `Loader.exe` / `RimUsb.sys` for a flash/NVS
+  write primitive (the deterministic route to the signing bypass).
 
 ## Failed
 
@@ -85,7 +92,8 @@ OS update protocol decoded. The only remaining door to custom code is the
 - The **2014 bootloader disclosure** and the **PlaidCTF simulator** are the key
   prior art; no public bootloader exploit exists for the 9930.
 - The community still maintains **free network-unlock guides** (carrier unlock,
-  not bootloader) and OS archives (last official 7.1.0.1047 / Bundle 2840).
+  not bootloader) and OS archives (this device: **7.1.0.1066 / Bundle 2879**;
+  commonly archived: 7.1.0.1047 / Bundle 2840).
 - Hubs: CrackBerry, XDA.
 
 ## Repository layout
@@ -96,7 +104,6 @@ recon/        module lists, event logs, USB boot traces
 specimens/    COD module dump + manifests + decompiled output
 experiments/  custom module builds (rapc source + .rapc + .cod)
 tools/        scripts written for this research (Python / PowerShell)
-docs/         supporting docs
 ```
 
 ### Session index
@@ -117,6 +124,16 @@ docs/         supporting docs
 - `notes/session13-offline-decompile-trust-bug-hunt.md` — coddec; RRT wall is native
 - `notes/session14-hardware-and-software-surface-map.md` — **[map]** full inventory + ranked opportunities
 - `notes/session15-module-audit-sbinjector-autolaunch.md` — module audit
+- `notes/session16-deviceswitch-backup-format.md` — DeviceSwitch SD-backup format & crypto
+- `notes/session17-native-code-signing-verifier-in-sfi.md` — **[key result]** native module verifier is in the `.sfi`
+- `notes/session18-jvm-secure-flag-and-signing-gate.md` — **[key result]** JVM "secure" flag (NVS prop `0x32`) is the signing gate
+- `notes/session19-native-parser-inventory-and-fastjpeg.md` — native parser inventory + FASTJPEG audit
+- `notes/session20-sfi-component-map-and-libpng.md` — `.sfi` component/load map + libpng 1.2.44
+- `notes/session21-browser-engine-webkit-jsc.md` — **[key result]** WebKit + JavaScriptCore engine
+- `notes/session22-campaign-assessment.md` — campaign assessment + recommended path
+- `notes/session23-loader-flash-capability.md` — AppLoader flash/partition capability
+- `notes/session25-javaloader-working.md` — **[key result]** RIM JavaLoader working live
+- `notes/session26-sachesi-and-bbos7-autoloader-research.md` — Sachesi & BBOS 7 autoloader research
 
 ### Toolchain (NOT committed — re-create per machine)
 
