@@ -69,3 +69,6 @@ try:
     usb.util.release_interface(jl.d, 0)
 except Exception:
     pass
+
+if __name__ == "__main__":
+    main(sys.argv)
