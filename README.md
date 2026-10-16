@@ -135,6 +135,8 @@ tools/        scripts written for this research (Python / PowerShell)
 - `notes/session25-javaloader-working.md` — **[key result]** RIM JavaLoader working live
 - `notes/session26-sachesi-and-bbos7-autoloader-research.md` — Sachesi & BBOS 7 autoloader research
 - `notes/session27-loader-usb-protocol.md` — **[key result]** Loader opcode map + ChannelPacket protocol (live)
+- `notes/session28-sfi-boot-elf-loader.md` — **[key result]** SFI boot ELF loader mapped (structural checks; verification via an indirect callback); exact-build (7.1.0.1066) Loader Files extraction
+- `notes/session29-loader-cfp-verify-decision.md` — **[key result]** `Loader.exe` RAM-flash command set (`CMD_WRITE_RAM*`/`CMD_EXECUTE_RAM`) + OS signature-verify decision (verifier `0x5e0f60`; caller flag / insecure-mode `3` bypass)
 
 ### Toolchain (NOT committed — re-create per machine)
 
