@@ -126,7 +126,7 @@ Remaining true bypass routes are unchanged: a boot-chain/kernel tamper (PSIRT 00
 session30) or abusing a runtime bug in the verifier itself.
 
 ## Artifacts
-- Key decompiled sources saved to `recon/decompiled/`:
+- Key decompiled sources saved to `recon/cldc-sources/`:
   `RIMSignature.java`, `MIDletSecurityCrypto.java`, `ControlledAccess.java`,
   `ApplicationManagerImpl.java` (excerpt region), `net_rim_cldcRIMResources.java`.
 - Full decompile (4969 files) kept only in scratch: `%TEMP%\opencode\bb9930\dec_root\decompiled\net_rim_cldc\`.
