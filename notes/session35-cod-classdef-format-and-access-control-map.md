@@ -146,8 +146,26 @@ index   4:  100   File I/O, Bluetooth, GPS, PersistentStore, notifications, sync
                   ApplicationManager/CodeModuleManager, EventInjector  -> device/system key
 index 255:  705   unrestricted (no signer)
 ```
-(Legend inferred from class categories; exact key names for indices 3/4 unconfirmed.)
-Note: `EventLogger` = 255 and `ControlledAccess`/`CodeSigningKey` = 255.
+**Which indices are exported.** Cross-referencing the public `net_rim_api.jar` against the
+map: index 0 and index 2 are **internal-only** (0 of 2947 / 0 of 21 classes are in the
+public jar) — third-party apps cannot reference them. The public API exports only
+indices **255** (unrestricted), **1**, **3**, **4**.
+`EventLogger`, `Arrays`, `Fixed32`, `StringUtilities` = 255;
+`ControlledAccess`/`CodeSigningKey` = 255.
+
+**Key ids** (ASCII-LE, recovered from rapc output + embedded COD blobs):
+`52525400`=RIM Runtime API (RRT), `52424200`=RIM Blackberry Apps API (RBB),
+`52435200`=RIM Crypto API - RIM (RCR), `52434900`=RIM Crypto API - Internal (RCI),
+`33000000`=RIMAPPSA2.
+
+**`.csl`/`.cso` (rapc output, found in `experiments/jvmprobe/build/`):**
+- `.cso` is a **constant template** emitted for every module:
+  `33000000=RIMAPPSA2 / 52424200=RIM Blackberry Apps API / 52434900=RIM Crypto API - Internal / 52435200=RIM Crypto API - RIM`.
+- `.csl` is the per-module **required-signature set**. `JvmProbe.csl` (the module that
+  referenced `CodeModuleManager`, index 4) = `52525400=RIM Runtime API`; `JvmProbe2.csl`
+  (only 255-classes) is absent. ⇒ referencing a secureIndex class pulls its key into
+  `.csl`; **index 4 requires RRT**. (RRT is *not* in the `.cso` template — it is
+  requirement-driven.)
 
 ## Corrected model of the wall (replaces session34 §"member-level")
 
@@ -176,10 +194,47 @@ Disambiguating needs a probe that reports step-by-step results on **screen** (re
   non-bulk index (1/2/3/4).
 - `tools/coddec/.../coddec.java` — `dumpSecure()` now also emits `off=`.
 
+## Native-method gate (new finding)
+
+The COD data section has a dedicated **native routine table**
+(`DataSection._nativeRoutines`, `"native routine table"`: a list of `u16` routine
+offsets, read at `DataSection.java:745-762`). The compiler warns
+`"Invocation of native methods requires signing with key: RIMAPPSA2"`
+(`Compiler.java:2569`) and adds `33000000=RIMAPPSA2` to the module's key lists.
+This is a **separate gate** from the class `secureIndex`:
+
+- **Link-time, class-level**: any reference to a class with `secureIndex != 255`
+  (`VerifyError`; JvmProbe → `CodeModuleManager`).
+- **Run-time, native-method**: invoking a native method from an unsigned module is
+  denied (JvmProbe2 called the *native* `ControlledAccess.verifySignatures` /
+  `CodeSigningKey.get` on 255-classes and got `IllegalArgumentException`; `EventLogger.logEvent`
+  is also native ⇒ no output). Every module (even an empty probe) gets
+  `RIMAPPSA2` in its `.cso`.
+
+This is a coherent explanation of everything observed to date and is the leading
+candidate for the session34 runtime fault (rather than any per-member flag).
+
+## JvmProbe3 (built)
+
+`experiments/jvmprobe/JvmProbe3.java` (+ `.rapc`) — references **only** 255-classes so
+the module links, then runs step-by-step from a worker thread and renders each outcome
+**on screen** (read back with `JavaLoader -u screenshot`), since `EventLogger` is
+unavailable to unsigned code. Steps: S1 pure Java, S2 `Integer.toHexString`, S3
+`EventLogger.register` (return value), S4 `EventLogger.logEvent`, S5
+`CodeSigningKey.get`, S6 `ControlledAccess.verifySignatures`. Each is wrapped in
+`try/catch(Throwable)` and reports the exception class+message; the ">> Sn" line is
+written *before* the call so a hard fault still shows how far it got.
+
+Built clean: `experiments/jvmprobe/build/JvmProbe3.cod` (3588 B), no `.csl`, same
+`.cso` as JvmProbe2. Install/launch:
+`tools\jde71\JavaLoader.exe -u load experiments\jvmprobe\build\JvmProbe3.cod`
+then launch from the UI and `tools\jde71\JavaLoader.exe -u screenshot screen.bmp`.
+
 ## Next
 
-- Build the screen-output probe (JvmProbe3) to disambiguate hypothesis (a) vs (b):
-  step 1 plain write, step 2 touch one `secureIndex=4` class, step 3 `EventLogger`
-  register+log; render each step's outcome as text and screenshot it.
-- Optionally derive the exact `secureIndex`→key order by locating `net_rim_api.csl`
-  (not in the two JDE trees we have) or by diffing more OS modules' embedded key blobs.
+- Install + launch JvmProbe3; screenshot the result. If S1/S2 succeed and S3–S6 fault
+  with `IllegalArgumentException`, the native-method gate is confirmed. If S3
+  `register` returns false, that additionally explains the missing EventLogger output.
+- (Optional) Recover the exact `secureIndex`→key order: locate `net_rim_api.csl`
+  (not shipped in our JDE trees) — the `.csl`/`.cso` mapping experiment here was
+  inconclusive because a bare reference did not register a requirement.
