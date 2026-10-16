@@ -1,0 +1,12 @@
+﻿Name                                           Sibling?  Num Siblings  Hash                                      Offset     Length
+---------------------------------------------  --------  ------------  ----------------------------------------  ---------  ---------
+experiments\autostart\build\WSSBootTest.cod    No                      193e55785006113ef2076bfb20547c0eec02b5bc
+---------------------------------------------  --------  ------------  ----------------------------------------  ---------  ---------
+JavaLoader.exe : RIM Wireless Handheld Java Loader
+At line:1 char:204
++ ... t_flat.txt; & $jl siblinginfo experiments\autostart\build\WSSBootTest ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (RIM Wireless Handheld Java Loader:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Copyright 2001-2010 Research In Motion Limited
