@@ -230,6 +230,20 @@ Built clean: `experiments/jvmprobe/build/JvmProbe3.cod` (3588 B), no `.csl`, sam
 `tools\jde71\JavaLoader.exe -u load experiments\jvmprobe\build\JvmProbe3.cod`
 then launch from the UI and `tools\jde71\JavaLoader.exe -u screenshot screen.bmp`.
 
+## JvmProbe4 (built)
+
+`experiments/jvmprobe/JvmProbe4.java` + `SecureTouch.java` (+ `.rapc`) — isolates the
+**link-time class-level** failure. The entry class contains **no** secureIndex!=255
+reference; the only one lives in separate helper `SecureTouch` (calls `CodeModuleManager`,
+index 4) and is reached solely from a "Touch secure class" menu item.
+
+- module loads/renders ⇒ verification is **lazy** (per class, on first use).
+- module fails to load ⇒ verification is **eager** (whole module at add time).
+Either way the outcome is on screen. Built clean:
+`experiments/jvmprobe/build/JvmProbe4.cod` (2700 B).
+`build/JvmProbe4.csl` = `52525400=RIM Runtime API` — **reproducibly confirms
+index 4 ⇒ RRT** (referencing `CodeModuleManager` pulls RRT into the module's `.csl`).
+
 ## Next
 
 - Install + launch JvmProbe3; screenshot the result. If S1/S2 succeed and S3–S6 fault

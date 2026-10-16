@@ -1,0 +1,9 @@
+MIDlet-Name: JvmProbe4
+MIDlet-Version: 1.0.0
+MIDlet-Vendor: Williamson Security Solutions
+MIDlet-Description: Unsigned JVM probe (isolate link-time class-4 verification)
+MIDlet-Jar-URL: JvmProbe4.jar
+MIDlet-Jar-Size: 0
+MicroEdition-Profile: MIDP-2.0
+MicroEdition-Configuration: CLDC-1.1
+MIDlet-1: JvmProbe4,,
