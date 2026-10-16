@@ -111,11 +111,49 @@ Open avenues (data-point driven, in rough order of promise):
 4. **Boot-chain** — PSIRT 000036557 (session30) remains the only route to a modified
    kernel; everything in the Java layer funnels through the same signature wall.
 
+## 6. Decompiling the signing modules (`tools/coddec`)
+
+`tools/coddec` is a self-contained Java COD->source decompiler (compiled for JVM 21;
+run with the Microsoft JDK 21 on this box):
+
+```
+java -cp tools\coddec\out net.rim.tools.a.coddec <file.cod>
+# writes decompiled/<module>/<package>/<Class>.java next to the .cod
+```
+
+Findings:
+- `net_rim_app_manager.cod` -> `net.rim.device.api.system.ApplicationManagerApp`
+  (boot entry: `main()` constructs `ApplicationManagerImpl`) and
+  `com.rim.resources.net_rim_app_managerRIMResources`. The resource class carries
+  the module's **security metadata**:
+  `_securityVendorIds = [0x33]`, plus `_securityDescriptions` / `_securityKeys`
+  (empty here). **0x33 = 51 = RIM's signing vendor id — the same id as the mystery
+  `\x33\0\0\0` COD record**, tying that record to RIM's security vendor.
+- `net_rim_bb_trust_application_manager.cod` -> `TrustApplicationManager`
+  (decompiles to an empty body).
+- `net_rim_cldc.cod` is a **multi-module container** (`net_rim_cldc-1.cod` ..
+  `net_rim_cldc-7.cod`); coddec aborts with `Unexpected opcode: 286` — BBOS 7.1 uses
+  bytecode opcodes beyond coddec's VS-6 VM table.
+- The CLDC string table (uncompressed) holds the whole code-signing decision surface:
+  - `' missing RRI signature'` @ `0x0ed964`, `' missing RRT signature'` @ `0x0ed980`
+    (adjacent entries in the sorted literal table) — the exact AppManager log lines.
+  - `RBB\0RCI\0RCR\0RRT\0` @ `0x0d046` — the ordered signature-type list.
+  - `Invalid signature` @ `0x9d252`, `Input is not signed, but is expected to be
+    signed` @ `0x225359`, `Key not found for signerId 0x` @ `0x0ec22`.
+- **Conclusion**: RBB/RCI/RCR/RRT are real cryptographic signature records
+  (128-byte signatures) validated by the CLDC Application Manager; a module with a
+  missing/invalid record is treated as untrusted (no autostart, no controlled APIs).
+  Forging a valid record requires RIM's private signing key, so the module-signing
+  wall holds.
+
 ## Artifacts
 - `recon/device/eventlog.txt` (426 KB), `eventlog2.txt`, `modlist_flat.txt` (564),
   `modlist_g.txt`, `langid.txt`, `device/screen.bmp` (1.2 MB),
   `device/modules/*.cod` (net_rim_cldc, services_impl, app_manager,
   bb_trust_application_manager), `device/wssboottest_sibling.txt`
-- Scratch: `%TEMP%\opencode\bb9930\cod_sig_dump.py`, `cod_dump2.py`
+- Scratch: `%TEMP%\opencode\bb9930\cod_sig_dump.py`, `cod_dump2.py`, `cod_strs.py`,
+  `cldc_strings.py`, `cldc_rrt_ctx.py`; coddec output under `...\dec_root\decompiled\`
+- Relevant decompiled sources: `dec_root\decompiled\net_rim_app_manager\...\ApplicationManagerApp.java`,
+  `...\net_rim_app_managerRIMResources.java`
 - Related: `session05` (signing wall), `session30` (PSIRT + OSBL auth),
   `session25` (JavaLoader working)
