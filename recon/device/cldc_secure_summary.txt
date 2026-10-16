@@ -1,0 +1,201 @@
+secureIndex distribution for net_rim_cldc.cod (3834 classes)
+255 = unrestricted (no signer). 0 = base RIM Runtime API (RRT). others = controlled keys.
+
+index 0 : 2947 classes
+index 1 : 17 classes
+index 2 : 21 classes
+index 3 : 44 classes
+index 4 : 100 classes
+index 255 : 705 classes
+
+=== non-bulk indices (full class lists) ===
+
+--- index 1 (17 classes) ---
+  net.rim.blackberry.api.homescreen.HomeScreen  off=4bfe
+  net.rim.blackberry.api.homescreen.HomescreenNatives  off=4cda
+  net.rim.blackberry.api.homescreen.Location  off=4e2e
+  net.rim.blackberry.api.homescreen.Shortcut  off=5ade
+  net.rim.blackberry.api.homescreen.ShortcutCommandItemProvider  off=5b1a
+  net.rim.blackberry.api.homescreen.ShortcutEventListener  off=5b44
+  net.rim.blackberry.api.homescreen.ShortcutIconField  off=5b72
+  net.rim.blackberry.api.homescreen.ShortcutIconField$ShortcutInfo  off=5ba6
+  net.rim.blackberry.api.homescreen.ShortcutProvider  off=5be0
+  net.rim.blackberry.api.homescreen.TodayNotificationRegistry  off=6198
+  net.rim.blackberry.api.homescreen.TodayRegistryChangeListener  off=61e8
+  net.rim.blackberry.api.sms.SMS  off=59c8
+  net.rim.blackberry.api.sms.SendListener  off=59f6
+  net.rim.blackberry.api.spellcheck.SpellCheckEngine  off=5d3e
+  net.rim.blackberry.api.spellcheck.SpellCheckEngineFactory  off=5d86
+  net.rim.device.api.system.KeyHandlerRegistry  off=5fd0
+  net.rim.device.api.system.KeyHandlerRegistryException  off=6000
+
+--- index 2 (21 classes) ---
+  net.rim.device.api.crypto.BBRClientAuth  off=38be
+  net.rim.device.api.crypto.Crypto10Initialization  off=3e0e
+  net.rim.device.api.crypto.CryptoKernel  off=3f10
+  net.rim.device.api.crypto.HashCodeCalculator  off=4470
+  net.rim.device.api.crypto.ITPolicyAuthentication  off=44b0
+  net.rim.device.api.crypto.NativeBlockCipher  off=485e
+  net.rim.device.api.crypto.NativeDL  off=48ce
+  net.rim.device.api.crypto.NativeDigest  off=4906
+  net.rim.device.api.crypto.NativeEC  off=496a
+  net.rim.device.api.crypto.NativeFIPSPRNG  off=49c6
+  net.rim.device.api.crypto.NativeRSA  off=49fc
+  net.rim.device.api.crypto.OSSelfTestModule  off=4b06
+  net.rim.device.api.crypto.RIMDigestFactoryCrypto10  off=4d94
+  net.rim.device.api.crypto.RIMFactoryUtilities  off=4dc2
+  net.rim.device.api.crypto.RIMSignature  off=4dfe
+  net.rim.device.api.crypto.RegistrationUtilities  off=5214
+  net.rim.device.api.crypto.SelfTestData  off=5400
+  net.rim.device.api.crypto.SelfTestModule  off=5438
+  net.rim.device.api.crypto.SoftwareHMACCryptoToken  off=3ca6
+  net.rim.device.api.crypto.SoftwareHMACCryptoToken$HMACContext  off=54fa
+  net.rim.device.api.crypto.SoftwareHMACCryptoToken$HMACKeyData  off=3cf0
+
+--- index 3 (44 classes) ---
+  net.rim.device.api.crypto.AESCTRDRBGPseudoRandomSource  off=3782
+  net.rim.device.api.crypto.AbstractDigest  off=37c6
+  net.rim.device.api.crypto.AbstractMAC  off=380c
+  net.rim.device.api.crypto.AbstractPseudoRandomSource  off=3858
+  net.rim.device.api.crypto.CryptoException  off=3ee4
+  net.rim.device.api.crypto.CryptoSelfTestError  off=3f82
+  net.rim.device.api.crypto.CryptoToken  off=2bd8
+  net.rim.device.api.crypto.CryptoTokenException  off=3fb0
+  net.rim.device.api.crypto.CryptoTokenMACContext  off=3fdc
+  net.rim.device.api.crypto.CryptoTokenMACKeyData  off=2c06
+  net.rim.device.api.crypto.CryptoUnsupportedOperationException  off=4004
+  net.rim.device.api.crypto.Digest  off=41dc
+  net.rim.device.api.crypto.DigestFactory  off=421a
+  net.rim.device.api.crypto.FIPS186PseudoRandomSource  off=4344
+  net.rim.device.api.crypto.HMAC  off=4428
+  net.rim.device.api.crypto.HMACCryptoToken  off=2fb8
+  net.rim.device.api.crypto.HMACKey  off=2ffa
+  net.rim.device.api.crypto.InvalidKeyException  off=450a
+  net.rim.device.api.crypto.Key  off=3548
+  net.rim.device.api.crypto.MAC  off=46d8
+  net.rim.device.api.crypto.MD5Digest  off=471c
+  net.rim.device.api.crypto.NoSuchAlgorithmException  off=4a34
+  net.rim.device.api.crypto.PRNGTest  off=4b42
+  net.rim.device.api.crypto.PseudoRandomSource  off=4d56
+  net.rim.device.api.crypto.RandomSource  off=4f64
+  net.rim.device.api.crypto.SHA1Digest  off=532e
+  net.rim.device.api.crypto.SHA256Digest  off=5374
+  net.rim.device.api.crypto.SHA512Digest  off=53ba
+  net.rim.device.api.crypto.SymmetricCryptoToken  off=3ec8
+  net.rim.device.api.crypto.SymmetricKey  off=3ef2
+  net.rim.device.api.crypto.transcoder.Transcoder  off=568c
+  net.rim.device.api.crypto.transcoder.TranscoderManager  off=5752
+  net.rim.device.api.crypto.transcoder.TranscoderRegistrationException  off=5860
+  net.rim.device.api.io.ConnectionCloseListener  off=4fae
+  net.rim.device.api.io.ConnectionCloseProvider  off=4fd8
+  net.rim.device.api.io.SocketConnectionEnhanced  off=5baa
+  net.rim.device.api.userauthenticator.PasswordFrameworkProvider  off=4a76
+  net.rim.device.api.userauthenticator.SecurityUIManager  off=4cb6
+  net.rim.device.api.userauthenticator.UserAuthenticationAccessDeniedException  off=5a2e
+  net.rim.device.api.userauthenticator.UserAuthenticationCancelException  off=5a62
+  net.rim.device.api.userauthenticator.UserAuthenticationException  off=5a8e
+  net.rim.device.api.userauthenticator.UserAuthenticator  off=5aba
+  net.rim.device.api.userauthenticator.UserAuthenticatorContextObject  off=5b16
+  net.rim.device.api.userauthenticator.UserAuthenticatorManager  off=5b7a
+
+--- index 4 (100 classes) ---
+  net.rim.blackberry.api.sms.OutboundMessageListener  off=547c
+  net.rim.device.api.applicationcontrol.ApplicationPermissions  off=4678
+  net.rim.device.api.applicationcontrol.ReasonProvider  off=55fc
+  net.rim.device.api.bluetooth.BluetoothSerialPort  off=3286
+  net.rim.device.api.bluetooth.BluetoothSerialPortInfo  off=335c
+  net.rim.device.api.bluetooth.BluetoothSerialPortListener  off=33b0
+  net.rim.device.api.content.DefaultContentHandlerRegistry  off=4030
+  net.rim.device.api.crypto.CryptoByteArrayArithmetic  off=3e3a
+  net.rim.device.api.crypto.ECPointAtInfinityException  off=428e
+  net.rim.device.api.crypto.VerificationException  off=5926
+  net.rim.device.api.gps.GPSInfo  off=5680
+  net.rim.device.api.gps.GPSSettings  off=5dfc
+  net.rim.device.api.gps.LocationInfo  off=65da
+  net.rim.device.api.io.File  off=455e
+  net.rim.device.api.io.FileInfo  off=2e46
+  net.rim.device.api.io.FileInputStream  off=46ae
+  net.rim.device.api.io.FileOutputStream  off=470a
+  net.rim.device.api.io.FilterBaseInterface  off=4838
+  net.rim.device.api.io.MIMETypeAssociations  off=4d76
+  net.rim.device.api.io.MobitexAddress  off=4f1a
+  net.rim.device.api.io.MulticastDatagramConnection  off=4f62
+  net.rim.device.api.io.file.ExtendedFileConnection  off=449a
+  net.rim.device.api.io.file.FileSystemJournal  off=4794
+  net.rim.device.api.io.file.FileSystemJournalEntry  off=47c4
+  net.rim.device.api.io.file.FileSystemJournalListener  off=480e
+  net.rim.device.api.lowmemory.LowMemoryFailedListener  off=3f80
+  net.rim.device.api.lowmemory.LowMemoryListener  off=3faa
+  net.rim.device.api.lowmemory.LowMemoryManager  off=3fd4
+  net.rim.device.api.memorycleaner.MemoryCleanerDaemon  off=439c
+  net.rim.device.api.memorycleaner.MemoryCleanerListener  off=43dc
+  net.rim.device.api.notification.Consequence  off=29f8
+  net.rim.device.api.notification.NotificationProvider  off=46d6
+  net.rim.device.api.notification.NotificationRule  off=4ab6
+  net.rim.device.api.notification.NotificationsConstants  off=4700
+  net.rim.device.api.notification.NotificationsEngineListener  off=3926
+  net.rim.device.api.notification.NotificationsManager  off=4fc8
+  net.rim.device.api.synchronization.ConverterUtilities  off=5b02
+  net.rim.device.api.synchronization.OTASyncCapable  off=627e
+  net.rim.device.api.synchronization.OTASyncCapableSyncItem  off=62de
+  net.rim.device.api.synchronization.OTASyncListener  off=636e
+  net.rim.device.api.synchronization.OTASyncPriorityProvider  off=63c6
+  net.rim.device.api.synchronization.SerialSyncListener  off=68aa
+  net.rim.device.api.synchronization.SerialSyncManager  off=68d6
+  net.rim.device.api.synchronization.StateInfoListener  off=6a4c
+  net.rim.device.api.synchronization.SummaryParameterListener  off=6b70
+  net.rim.device.api.synchronization.SyncCollection  off=6b9c
+  net.rim.device.api.synchronization.SyncCollectionSchema  off=6be6
+  net.rim.device.api.synchronization.SyncCollectionSchemaProvider  off=6c2e
+  net.rim.device.api.synchronization.SyncCollectionStatistics  off=6c58
+  net.rim.device.api.synchronization.SyncCollectionStatisticsManager  off=6c86
+  net.rim.device.api.synchronization.SyncConverter  off=6ce0
+  net.rim.device.api.synchronization.SyncEventListener  off=6d0c
+  net.rim.device.api.synchronization.SyncItem  off=6d36
+  net.rim.device.api.synchronization.SyncManager  off=6d90
+  net.rim.device.api.synchronization.SyncManagerStatistics  off=6df6
+  net.rim.device.api.synchronization.SyncObject  off=6e20
+  net.rim.device.api.synchronization.UIDGenerator  off=6f20
+  net.rim.device.api.system.ApplicationManager  off=565e
+  net.rim.device.api.system.ApplicationManagerException  off=56ce
+  net.rim.device.api.system.Audio  off=52fe
+  net.rim.device.api.system.AudioFileListener  off=5378
+  net.rim.device.api.system.AudioListener  off=53d8
+  net.rim.device.api.system.Backlight  off=58e4
+  net.rim.device.api.system.CodeModuleGroup  off=61c6
+  net.rim.device.api.system.CodeModuleGroupManager  off=577a
+  net.rim.device.api.system.CodeModuleListener  off=484e
+  net.rim.device.api.system.CodeModuleManager  off=5828
+  net.rim.device.api.system.CodeModuleReplacementListener  off=638c
+  net.rim.device.api.system.Device  off=5cde
+  net.rim.device.api.system.EventInjector  off=5576
+  net.rim.device.api.system.EventInjector$Event  off=55a4
+  net.rim.device.api.system.EventInjector$KeyCodeEvent  off=55ec
+  net.rim.device.api.system.EventInjector$KeyEvent  off=5630
+  net.rim.device.api.system.EventInjector$NavigationEvent  off=5664
+  net.rim.device.api.system.EventInjector$TouchEvent  off=569c
+  net.rim.device.api.system.EventInjector$TrackwheelEvent  off=56e8
+  net.rim.device.api.system.MobitexInfo  off=659e
+  net.rim.device.api.system.MobitexInfo$MobitexCellInfo  off=65da
+  net.rim.device.api.system.MobitexPacketHeader  off=6608
+  net.rim.device.api.system.MultiServicePlatformConstants  off=66b4
+  net.rim.device.api.system.MultiServicePlatformListener  off=66de
+  net.rim.device.api.system.MultiServicePlatformManager  off=6708
+  net.rim.device.api.system.ObjectGroup  off=6988
+  net.rim.device.api.system.ObjectGroupReadOnlyException  off=69ba
+  net.rim.device.api.system.ObjectGroupTooBigException  off=69e4
+  net.rim.device.api.system.OwnerInfo  off=6a0e
+  net.rim.device.api.system.Peripheral  off=6b5e
+  net.rim.device.api.system.PeripheralListener  off=6b8e
+  net.rim.device.api.system.PersistentContent  off=6bb8
+  net.rim.device.api.system.PersistentContentListener  off=66e4
+  net.rim.device.api.system.PersistentObject  off=3afa
+  net.rim.device.api.system.PersistentStore  off=3b42
+  net.rim.device.api.system.Radio  off=6cca
+  net.rim.device.api.system.RuntimeStore  off=6f14
+  net.rim.device.api.ui.FontManager  off=5678
+  net.rim.device.api.ui.accessibility.AccessibilityManager  off=4ba6
+  net.rim.device.api.ui.autotext.AutoText  off=5320
+  net.rim.device.api.util.ContentProtectedHashtable  off=2a28
+  net.rim.device.api.util.ContentProtectedVector  off=2ade
+  net.rim.device.api.util.FactoryUtil  off=3ffa
